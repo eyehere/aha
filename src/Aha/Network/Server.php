@@ -111,7 +111,7 @@ abstract class Server {
 			'dispatch_mode'		=>	2,//(1:轮询模式2:固定模式3:抢占模式4:IP分配5:UID分配)
 			//'message_queue_key'=>	'',//(在ipc_mode=2或者task_ipc_mode=2时使用)
 			'backlog'			=>	128,//Listen队列的长度
-			'log_file'			=>	'/Users/luweijun/opt/base/goldenToad/log/yal.log',//错误日志文件
+			'log_file'			=>	'/Users/luweijun/opt/base/goldenToad/log/aha.log',//错误日志文件
 			'heartbeat_check_interval'=>60,//心跳检测间隔时间
 			'heartbeat_idle_time'=>	600,//连接最大允许空闲时间
 			'open_eof_check'	 =>	true,//打开eof检测
