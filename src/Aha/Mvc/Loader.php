@@ -60,6 +60,18 @@ class Loader {
 	}
 	
 	/**
+	 * @brief 获取namespace对应的path
+	 * @param string $namespace
+	 * @return boolean
+	 */
+	public function getPathByByNamespace(string $namespace) {
+		if ( !isset($this->_arrMap[$namespace]) ) {
+			return false;
+		}
+		return $this->_arrMap[$namespace];
+	}
+	
+	/**
 	 * @brief autoload 回调函数
 	 * @param type $className
 	 * @return type
