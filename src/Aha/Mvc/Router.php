@@ -18,7 +18,7 @@ namespace Aha\Mvc;
 
 class Router {
 	
-	const URI_MAX_DEPTH	= 4;
+	const URI_MAX_DEPTH	= 3;
 	
 	//application instance
 	private $_objBootstrap = null;
@@ -29,7 +29,10 @@ class Router {
 	//action class name
 	private $_action	=	null;
 	//invoke method
-	private $_method	=	null;
+	private $_method	=	'execute';
+	
+	//actions是否被校验过
+	private static $_arrActions = array();
 
 	/**
 	 * @brief 路由初始化
@@ -52,9 +55,16 @@ class Router {
 	 * @throws Exception
 	 */
 	protected function _route() {
+		$appNamespace = $this->_objBootstrap->getAppNamespace();
+		$appPath	  = $this->_objBootstrap->getLoader()->getPathByByNamespace($appNamespace);
+		
+		$defaultAction = explode(DIRECTORY_SEPARATOR, array($appPath, $appNamespace, 'Actions', 'Index', 'Index'));
+		
 		if ( empty($this->_uri) ) {
-			$this->_action = "${appNamespace}\\Actions\Index";
-			$this->_method = 'Index';
+			$this->_action = "${appNamespace}\\Actions\\Index\\Index";
+			if ( Aha\Mvc\Router::validate($defaultAction) ) {
+				throw new \Exception("default uri {$this->_uri} not found");
+			}
 			return;
 		}
 		
@@ -62,10 +72,12 @@ class Router {
 			throw new Exception("invalid uri {$this->_uri}");
 		}
 		
-		$arrUriPatrs = array_map('ucfirst',array_filter(explode($this->_delimiter, $this->_uri)));
+		$arrUriParts = array_map('ucfirst',array_filter(explode($this->_delimiter, $this->_uri)));
 		if ( empty($arrUriParts) ) {
-			$this->_action = "${appNamespace}\\Actions\Index";
-			$this->_method = 'Index';
+			$this->_action = "${appNamespace}\\Actions\\Index\\Index";
+			if ( Aha\Mvc\Router::validate($defaultAction) ) {
+				throw new \Exception("default uri {$this->_uri} not found");
+			}
 			return;
 		}
 		
@@ -77,58 +89,68 @@ class Router {
 	}
 	
 	/**
-	 * @brief 路由尝试及文件检测
-	 * @param type $arrUriParts
+	 * @brief 递归的进行最大深度的尝试和遍历 进行路由检测
+	 * @param array $arrElements
+	 * @param string $append
 	 * @return type
 	 * @throws \Exception
 	 */
-	protected function _detect($arrUriParts) {
+	protected function _detect(array $arrElements, string $append = '' ) {
 		$appNamespace = $this->_objBootstrap->getAppNamespace();
 		$appPath	  = $this->_objBootstrap->getLoader()->getPathByByNamespace($appNamespace);
+		
+		if ( !empty($append) ) {
+			array_push($arrElements, $append);
+		}
+		$arrUriParts  = $arrElements;
 		array_unshift($arrUriParts, $appNamespace);
-		//达到最长度限制的只能是这样 最后一个元素是method 倒数第二个元素是action
-		if (count($arrUriParts) === self::URI_MAX_DEPTH + 1 ) {
-			$method = array_pop($arrUriParts);
-			$actionPath = explode(DIRECTORY_SEPARATOR, $arrUriParts);
-			if ( !file_exists($appPath . DIRECTORY_SEPARATOR . $actionPath . AHA_EXT) ) {
-				throw new \Exception("uri {$this->_uri} not found");
-			}
-			$this->_action = explode('\\', $arrUriParts);
-			$this->_method = $method;
-			return;
-		}
 		
-		//首先尝试method为Index的情况(同级目录中文件名和目录名相同 目录优先，找Index.php)
 		$actionPath = explode(DIRECTORY_SEPARATOR, $arrUriParts);
-		if ( file_exists($appPath . DIRECTORY_SEPARATOR . $actionPath . AHA_EXT) ) {
+		if ( in_array($appPath . DIRECTORY_SEPARATOR . $actionPath, self::$_arrActions) ) {
 			$this->_action = explode('\\', $arrUriParts);
-			$this->_method = 'Index';
 			return;
 		}
 		
-		//self::URI_MAX_DEPTH-1 个长度事 index尝试未成功 直接抛异常
 		if (count($arrUriParts) === self::URI_MAX_DEPTH ) {
-				throw new \Exception("uri {$this->_uri} not found");
+			throw new \Exception("uri {$this->_uri} not found");
 		}
 		
-		//尝试最后一个元素为method 倒数第二个为action
-		$method = array_pop($arrUriParts);
-		if ( file_exists($appPath . DIRECTORY_SEPARATOR . $actionPath . AHA_EXT) ) {
-			$this->_action = explode('\\', $arrUriParts);
-			$this->_method = $method;
-			return;
-		}
-		
-		//尝试action和目录均为缺省的情况
-		array_push($arrUriParts,$method, 'Index');
-		$actionPath = explode(DIRECTORY_SEPARATOR, $arrUriParts);
-		if ( file_exists($appPath . DIRECTORY_SEPARATOR . $actionPath . AHA_EXT) ) {
-			$this->_action = explode('\\', $arrUriParts);
-			$this->_method = 'Index';
-			return;
-		}
-		
-		throw new \Exception("uri {$this->_uri} not found");
+		return $this->_detect($arrElements, 'Index');
 	}
 	
+	
+	/**
+	 * @brief 迭代出actions目录的所有action文件 
+	 * 这样在做路由的时候 检测路由是hash操作 不会有文件检测的io操作 更高效更快速
+	 * @param \Aha\Mvc\Aha\Bootstrap $bootstrap
+	 */
+	public static function loadActionPaths(Aha\Bootstrap $bootstrap) {
+		$appNamespace = $bootstrap->getAppNamespace();
+		$appPath	  = $bootstrap->getLoader()->getPathByByNamespace($appNamespace);
+		$actionPath	  = $appPath . DIRECTORY_SEPARATOR . 'actions';
+		
+		self::$_arrActions = array();
+		
+		$directoryIt = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($actionPath));
+		$directoryIt->rewind();
+		while ($directoryIt->valid()) {
+			if ( !$directoryIt->isDot() && substr($directoryIt->key(), -4) === AHA_EXT ) {
+				array_push(self::$_arrActions, basename($directoryIt->key(), AHA_EXT));
+			}
+			$directoryIt->next();
+		}
+	}
+	
+	
+	/**
+	 * @brief 校验action文件是否存在
+	 * @param string $actionPath
+	 * @return boolean
+	 */
+	public static function validate(string $actionPath) {
+		if ( !in_array($actionPath, self::$_arrActions) ) {
+			return false;
+		}
+		return true;
+	}
 }

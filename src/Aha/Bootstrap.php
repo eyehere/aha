@@ -136,6 +136,9 @@ class Bootstrap {
 		//init filter
 		//$this->_initFilter();
 		
+		//初始化router 注册action file
+		Aha\Mvc\Router::loadActionPaths($this);
+		
 		return $this;
 	}
 	
