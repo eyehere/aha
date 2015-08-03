@@ -14,3 +14,8 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
+namespace Ala\Mvc;
+
+class Dispatcher {
+	
+}

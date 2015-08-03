@@ -17,16 +17,18 @@
 
 namespace Ala;
 
-define('AHA_PATH', dirname(__DIR__));
-
 class Bootstrap {
 	
 	//当前application的名字
 	private $_appNamespace = null;
 	//部署环境
 	private $_environ = 'product';
+	
 	//loader instance
 	private $_loader = null;
+	
+	//config instance
+	private $_objConfig	= null;
 	
 	//application instance
 	private static $_instance = null;
@@ -61,6 +63,7 @@ class Bootstrap {
 	 * @brief 初始化自动加载器
 	 */
 	protected function _initLoader() {
+		define('AHA_PATH', dirname(__DIR__));
 		require_once AHA_PATH . '/Aha/Mvc/Loader.php';
 
 		$this->_loader = \Aha\Mvc\Loader::getInstance();
@@ -69,15 +72,19 @@ class Bootstrap {
 		spl_autoload_register( array($this->_loader, 'autoload') );
 	}
 	
-	
+	/**
+	 * @brief 初始化配置项
+	 */
 	protected function _initConfig() {
-		
+		$this->_objConfig = new \Aha\Mvc\Config($this);
 	}
-
-
+	
+	/**
 	protected function _initFilter() {
-		
+		define('AHA_DELINED', -1);
+		define('AHA_AGAIN', -2);
 	}
+	 */
 	
 	protected function _initDispatcher() {
 		
@@ -92,11 +99,27 @@ class Bootstrap {
 	}
 	
 	/**
+	 * @brief 获取配置实例
+	 * @return type
+	 */
+	public function getConfig() {
+		return $this->_objConfig;
+	}
+	
+	/**
 	 * @brief 获取部署环境
 	 * @return type
 	 */
 	public function getEnviron() {
 		return $this->_environ;
+	}
+	
+	/**
+	 * @brief 获取application namespace
+	 * @return type
+	 */
+	public function getAppNamespace() {
+		return $this->_appNamespace;
 	}
 
 	/**
