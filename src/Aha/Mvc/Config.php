@@ -66,11 +66,11 @@ class Config {
 	protected function _loadConfig(string $path) {
 		$direcotryIterator = new \DirectoryIterator($path);
 		foreach ( $direcotryIterator as $iteratorItem ) {
-			if ( ! ( $iteratorItem->isFile() && substr($iteratorItem->getFilename(), -4) === '.php' ) ) {
+			if ( ! ( $iteratorItem->isFile() && substr($iteratorItem->getFilename(), -4) === AHA_EXT ) ) {
 				continue;
 			}
 			$file		= $path . DIRECTORY_SEPARATOR . $iteratorItem->getFilename();
-			$section	= strtolower(basename($iteratorItem->getFilename(), '.php'));
+			$section	= strtolower(basename($iteratorItem->getFilename(), AHA_EXT));
 			if ( !isset($this->_arrConfig[$section]) ) {
 				$this->_arrConfig[$section] = require $file;
 				continue;

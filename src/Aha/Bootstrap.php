@@ -64,6 +64,7 @@ class Bootstrap {
 	 */
 	protected function _initLoader() {
 		define('AHA_PATH', dirname(__DIR__));
+		define('AHA_EXT', '.php');
 		require_once AHA_PATH . '/Aha/Mvc/Loader.php';
 
 		$this->_loader = \Aha\Mvc\Loader::getInstance();
@@ -85,10 +86,6 @@ class Bootstrap {
 		define('AHA_AGAIN', -2);
 	}
 	 */
-	
-	protected function _initDispatcher() {
-		
-	}
 
 	/**
 	 * @brief 获取自动加载器实例
@@ -102,9 +99,9 @@ class Bootstrap {
 	 * @brief 获取配置实例
 	 * @return type
 	 */
-	public function getConfig() {
+	/*public function getConfig() {
 		return $this->_objConfig;
-	}
+	}*/
 	
 	/**
 	 * @brief 获取部署环境
@@ -137,10 +134,7 @@ class Bootstrap {
 		$this->_initConfig();
 		
 		//init filter
-		$this->_initFilter();
-		
-		//init dispatcher
-		$this->_initDispatcher();
+		//$this->_initFilter();
 		
 		return $this;
 	}

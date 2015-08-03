@@ -18,4 +18,30 @@ namespace Ala\Mvc;
 
 class Dispatcher {
 	
+	//application instance
+	private $_objBootstrap = null;
+	
+	//router instance
+	private $_objRouter = null;
+	
+	/**
+	 * @brief 初始化dispatcher
+	 * @param \Ala\Mvc\Aha\Bootstrap $bootstrap
+	 * @return \Ala\Mvc\Dispatcher
+	 */
+	public function __construct(Aha\Bootstrap $bootstrap) {
+		$this->_objBootstrap = $bootstrap;
+		return $this;
+	}
+	
+	/**
+	 * @brief 路由分发
+	 * @param \Ala\Mvc\Aha\Mvc\Router $router
+	 * @return boolean
+	 */
+	public function dispatch(Aha\Mvc\Router $router) {
+		$this->_objRouter = $router;
+		return true;
+	}
+	
 }
