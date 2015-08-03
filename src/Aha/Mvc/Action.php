@@ -14,3 +14,34 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
+namespace Aha\Mvc;
+
+abstract class Action {
+	
+	//dispatcher instance
+	protected $_objDispatcher = null;
+	
+	/**
+	 * @brief 初始化Action
+	 * @param \Aha\Mvc\Aha\Mvc\Dispatcher $dispatcher
+	 * @return \Aha\Mvc\Action
+	 */
+	public function __construct(Aha\Mvc\Dispatcher $dispatcher) {
+		$this->_objDispatcher = $dispatcher;
+		return $this;
+	}
+	
+	/**
+	 * init before execute
+	 * block not allowed when init if extends
+	 */
+	public function init() {
+		
+	}
+
+	/**
+	 * @brief 子类必须实现的抽象方法
+	 */
+	abstract public function excute();
+	
+}
