@@ -66,16 +66,33 @@ class Bootstrap {
 	 * @brief 初始化自动加载器
 	 */
 	protected function _initLoader() {
+		//define('AHA_PATH', dirname(__DIR__));
+		//define('AHA_EXT', '.php');
+		//require_once AHA_PATH . '/Aha/Mvc/Loader.php';
+
+		$this->_loader = \Aha\Mvc\Loader::getInstance();
+		//$this->_loader->registerNamespace('Aha', AHA_PATH);
+
+		//spl_autoload_register( array($this->_loader, 'autoload') );
+	}
+	
+	/**
+	 * @brief 在server的第一行就加载Bootstrap文件，病调用此静态方法初始化Loader
+	 * @return Loader 可以在Loader中继续注册更多的命名空间个路径的对应关系
+	 */
+	public static function initLoader() {
 		define('AHA_PATH', dirname(__DIR__));
 		define('AHA_EXT', '.php');
 		require_once AHA_PATH . '/Aha/Mvc/Loader.php';
-
-		$this->_loader = \Aha\Mvc\Loader::getInstance();
-		$this->_loader->registerNamespace('Aha', AHA_PATH);
+		
+		$loader = Aha\Mvc\Loader::getInstance();
+		$loader->registerNamespace('Aha', AHA_PATH);
 
 		spl_autoload_register( array($this->_loader, 'autoload') );
+		return $loader;
 	}
-	
+
+
 	/**
 	 * @brief 初始化配置项
 	 */
