@@ -50,6 +50,22 @@ class Router {
 	}
 	
 	/**
+	 * @brief 获取路由完成后的action类名
+	 * @return type
+	 */
+	public function getAction() {
+		return $this->_action;
+	}
+	
+	/**
+	 * @brief 获取路由完成后调用的方法名
+	 * @return type
+	 */
+	public function getMethod() {
+		return $this->_method;
+	}
+	
+	/**
 	 * @brief 路由解析
 	 * @return type
 	 * @throws Exception
@@ -153,4 +169,5 @@ class Router {
 		}
 		return true;
 	}
+	
 }
