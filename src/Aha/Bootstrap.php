@@ -30,6 +30,9 @@ class Bootstrap {
 	//config instance
 	private $_objConfig	= null;
 	
+	//filter instance
+	private $_objFilter = null;
+	
 	//application instance
 	private static $_instance = null;
 	
@@ -81,11 +84,13 @@ class Bootstrap {
 	}
 	
 	/**
-	protected function _initFilter() {
-		define('AHA_DELINED', -1);
-		define('AHA_AGAIN', -2);
-	}
+	 * @brief 初始化过滤器
 	 */
+	protected function _initFilter() {
+		define('AHA_DELINED', -1);//交给下一个处理流程处理
+		define('AHA_AGAIN', -2);//需要再次调度
+		$this->_objFilter = new Aha\Mvc\Filter();
+	}
 
 	/**
 	 * @brief 获取自动加载器实例
@@ -99,10 +104,18 @@ class Bootstrap {
 	 * @brief 获取配置实例
 	 * @return type
 	 */
-	/*public function getConfig() {
+	public function getConfig() {
 		return $this->_objConfig;
-	}*/
+	}
 	
+	/**
+	 * @brief 获取filter instance
+	 * @return type
+	 */
+	public function getFilter() {
+		return $this->_objFilter;
+	}
+
 	/**
 	 * @brief 获取部署环境
 	 * @return type
@@ -133,8 +146,9 @@ class Bootstrap {
 		//init config
 		$this->_initConfig();
 		
-		//init filter
-		//$this->_initFilter();
+		//init filter:在worker启动的时候 由开发者调用静态类的静态方法添加钩子
+		//(注册的钩子需要考虑异步情况下的并发问题 避免因为并发下处理同一个对象带来麻烦)
+		$this->_initFilter();
 		
 		//初始化router 注册action file
 		Aha\Mvc\Router::loadActionPaths($this);

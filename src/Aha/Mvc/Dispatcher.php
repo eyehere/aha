@@ -51,14 +51,26 @@ class Dispatcher {
 		return $this;
 	}
 	
+	/**
+	 * @brief 获取bootstrap实例
+	 * @return type
+	 */
 	public function getBootstrap() {
 		return $this->_objBootstrap;
 	}
 	
+	/**
+	 * @brief 获取router实例
+	 * @return type
+	 */
 	public function getRouter() {
 		return $this->_objRouter;
 	}
 	
+	/**
+	 * @brief 获取协议
+	 * @return type
+	 */
 	public function getProtocal() {
 		return $this->_protocal;
 	}
@@ -104,14 +116,34 @@ class Dispatcher {
 	 */
 	public function dispatch(Aha\Mvc\Router $router) {
 		$this->_objRouter = $router;
+		$this->_objFilter = new Aha\Mvc\Filter();
+		//filter 分发时候触发 pre router 钩子
+		$this->_objBootstrap->getFilter()->preRouter($this);
+	}
+	
+	/**
+	 * @brief 在preRouter中触发
+	 */
+	public function routeLoop() {
+		$this->_objRouter->route();
+		$this->_objBootstrap->getFilter()->postRouter($this);
+	}
+
+
+	/**
+	 * @brief 在preDispatch 中触发
+	 * @throws Exception
+	 */
+	public function dispatchLoop() {
+		$action = $this->_objRouter->getAction();
+		$method	= $this->_objRouter->getMethod();
 		
-		//filter
+		$objAction = new $action();
+		if ( !is_subclass_of($objAction, 'Aha\\Mvc\\Action') ) {
+			throw new Exception( "class $action is not extends Aha\\Mvc\\Action" );
+		}
 		
-		//validate action
-		
-		//call action
-		
-		return true;
+		call_user_func(array($objAction, 'before'), $this);
 	}
 	
 }

@@ -32,16 +32,26 @@ abstract class Action {
 	}
 	
 	/**
-	 * init before execute
+	 * @brief before execute
 	 * block not allowed when init if extends
 	 */
-	public function init() {
-		
+	final public function brefore(\Aha\Mvc\Dispatcher $dispatcher) {
+		$this->_objDispatcher = $dispatcher;
+		$this->excute();
+		$this->after();
 	}
 
 	/**
 	 * @brief 子类必须实现的抽象方法
 	 */
 	abstract public function excute();
+	
+	/**
+	 * @brief after execute
+	 * block not allowed when init if extends
+	 */
+	final public function after() {
+		$this->_objDispatcher->getBootstrap()->getFilter()->postDispatch($this);
+	}
 	
 }

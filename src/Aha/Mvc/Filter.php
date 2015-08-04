@@ -15,7 +15,9 @@
   +----------------------------------------------------------------------+
 */
 namespace Ala\Mvc;
-//Filter暂时不启用，主要原因：框架运行变得重耦合，实现方不注意细节可能阻塞整个进程
+//Filter建议慎重使用，主要原因：框架运行变得重耦合，实现方不注意细节可能阻塞整个进程
+//init filter:在worker启动的时候 由开发者调用静态类的静态方法添加钩子
+//(注册的钩子需要考虑异步情况下的并发问题 避免因为并发下处理同一个对象带来麻烦)
 class Filter {
 	
 	//路由之前
@@ -31,22 +33,41 @@ class Filter {
 		;
 	}
 	
-	//注册路由之前回调
+	/**
+	 * @brief 路由之前回调
+	 * @param type $callback  cbFn($dispatcher, $data=array('cbIndex'=>0,'callback'=>cbFn,...))
+	 * @return \Ala\Mvc\Filter
+	 */
 	public function registerPreRouter($callback) {
 		array_push($this->_arrPreRouter, $callback);
 		return $this;
 	}
-	//注册路由之后回调
+	
+	/**
+	 * @brief 路由之前回调
+	 * @param type $callback  cbFn($dispatcher, $data=array('cbIndex'=>0,'callback'=>cbFn,...))
+	 * @return \Ala\Mvc\Filter
+	 */
 	public function registerPostRouter($callback) {
 		array_push($this->_arrPostRouter, $callback);
 		return $this;
 	}
-	//注册分发之前回调
+
+	/**
+	 * @brief 分发之前回调
+	 * @param type $callback  cbFn($dispatcher, $data=array('cbIndex'=>0,'callback'=>cbFn,...))
+	 * @return \Ala\Mvc\Filter
+	 */
 	public function registerPreDispatch($callback) {
 		array_push($this->_arrPreDispatch, $callback);
 		return $this;
 	}
-	//注册分发之后回调
+	
+	/**
+	 * @brief 分发之后回调(注意：为了框架雨业务解耦，这个过程在调用分发之后会立即执行 基本认为与分发过程是并行执行)
+	 * @param type $callback  cbFn($dispatcher, $data=array('cbIndex'=>0,'callback'=>cbFn,...))
+	 * @return \Ala\Mvc\Filter
+	 */
 	public function registerPostDispatch($callback) {
 		array_push($this->_arrPostDispatch, $callback);
 		return $this;
@@ -64,9 +85,11 @@ class Filter {
 		}
 		$cbIndex = $data['cbIndex'];
 		if ( !isset($this->_arrPreRouter[$cbIndex]) ) {
-			return AHA_DECLINED;
+			return $dispatcher->routeLoop();
+			//return AHA_DECLINED;
 		}
 		$data['cbIndex']++;
+		$data['callback'] = array($this, __FUNCTION__);
 		call_user_func($this->_arrPreRouter[$cbIndex], $dispatcher, $data);
 		return AHA_AGAIN;
 	}
@@ -83,9 +106,11 @@ class Filter {
 		}
 		$cbIndex = $data['cbIndex'];
 		if ( !isset($this->_arrPostRouter[$cbIndex]) ) {
-			return AHA_DECLINED;
+			$this->preDispatch($dispatcher);
+			//return AHA_DECLINED;
 		}
 		$data['cbIndex']++;
+		$data['callback'] = array($this, __FUNCTION__);
 		call_user_func($this->_arrPostRouter[$cbIndex], $dispatcher, $data);
 		return AHA_AGAIN;
 	}
@@ -102,9 +127,11 @@ class Filter {
 		}
 		$cbIndex = $data['cbIndex'];
 		if ( !isset($this->_arrPreDispatch[$cbIndex]) ) {
-			return AHA_DECLINED;
+			return $dispatcher->dispatchLoop();
+			//return AHA_DECLINED;
 		}
 		$data['cbIndex']++;
+		$data['callback'] = array($this, __FUNCTION__);
 		call_user_func($this->_arrPreDispatch[$cbIndex], $dispatcher, $data);
 		return AHA_AGAIN;
 	}
@@ -124,6 +151,7 @@ class Filter {
 			return AHA_DECLINED;
 		}
 		$data['cbIndex']++;
+		$data['callback'] = array($this, __FUNCTION__);
 		call_user_func($this->_arrPostDispatch[$cbIndex], $dispatcher, $data);
 		return AHA_AGAIN;
 	}

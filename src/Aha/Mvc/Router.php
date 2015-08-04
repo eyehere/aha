@@ -45,7 +45,6 @@ class Router {
 		$this->_objBootstrap = $bootstrap;
 		$this->_uri			= str_replace(array(' ','.'),'',$uri);
 		$this->_delimiter	= $delimeter;
-		$this->_route();
 		return $this;
 	}
 	
@@ -70,7 +69,7 @@ class Router {
 	 * @return type
 	 * @throws Exception
 	 */
-	protected function _route() {
+	public function route() {
 		$appNamespace = $this->_objBootstrap->getAppNamespace();
 		$appPath	  = $this->_objBootstrap->getLoader()->getPathByByNamespace($appNamespace);
 		
