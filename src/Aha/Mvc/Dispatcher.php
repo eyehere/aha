@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace \Aha\Mvc;
+namespace Aha\Mvc;
 
 class Dispatcher {
 	
@@ -45,7 +45,7 @@ class Dispatcher {
 	 * @param \Aha\Mvc\Aha\Bootstrap $bootstrap
 	 * @return \Aha\Mvc\Dispatcher
 	 */
-	public function __construct(\Aha\Bootstrap $bootstrap, string $protocal = 'http') {
+	public function __construct(\Aha\Bootstrap $bootstrap, \string $protocal = 'http') {
 		$this->_objBootstrap = $bootstrap;
 		$this->_protocal	 = $protocal;
 		return $this;
@@ -139,7 +139,7 @@ class Dispatcher {
 		$method	= $this->_objRouter->getMethod();
 		
 		$objAction = new $action();
-		if ( !is_subclass_of($objAction,  \Aha\\Mvc\\Action') ) {
+		if ( !is_subclass_of($objAction,  '\\Aha\\Mvc\\Action') ) {
 			throw new Exception( "class $action is not extends \Aha\\Mvc\\Action" );
 		}
 		

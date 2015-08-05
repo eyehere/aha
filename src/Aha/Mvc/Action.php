@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace \Aha\Mvc;
+namespace Aha\Mvc;
 
 abstract class Action {
 	

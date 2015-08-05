@@ -42,7 +42,7 @@ class Bootstrap {
 	 * @param string $environ
 	 * @return type
 	 */
-	public static function getInstance(string $appNamespace, string $environ = 'product') {
+	public static function getInstance(\string $appNamespace, \string $environ = 'product') {
 		if ( null === self::$_instance ) {
 			self::$_instance = new \Aha\Bootstrap($appNamespace, $environ);
 		}
@@ -55,7 +55,7 @@ class Bootstrap {
 	 * @param string $environ
 	 * @return \Aha\Bootstrap
 	 */
-	public function __construct(string $appNamespace, string $environ = 'product') {
+	public function __construct(\string $appNamespace, \string $environ = 'product') {
 		$this->_appNamespace	= $appNamespace;
 		$this->_environ			= $environ;
 		$this->_initLoader();
@@ -86,9 +86,9 @@ class Bootstrap {
 		require_once AHA_PATH . '/Aha/Mvc/Loader.php';
 		
 		$loader = \Aha\Mvc\Loader::getInstance();
-		$loader->registerNamespace('Aha', AHA_PATH);
+		$loader->registerNamespace('Aha', AHA_PATH );
 
-		spl_autoload_register( array($this->_loader, 'autoload') );
+		spl_autoload_register( array($loader, 'autoload') );
 		return $loader;
 	}
 
@@ -157,7 +157,7 @@ class Bootstrap {
 	public function run() {
 		$appPath = $this->_loader->getPathByByNamespace($this->_appNamespace);
 		if ( false === $appPath ) {
-			throw new Exception("appPath of {$this->_appNamespace} is not registered!");
+			throw new \Exception("appPath of {$this->_appNamespace} is not registered!");
 		}
 		
 		//init config
@@ -168,7 +168,7 @@ class Bootstrap {
 		$this->_initFilter();
 		
 		//初始化router 注册action file
-	 \Aha\Mvc\Router::loadActionPaths($this);
+		\Aha\Mvc\Router::loadActionPaths($this);
 		
 		return $this;
 	}

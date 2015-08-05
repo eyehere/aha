@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace \Aha\Mvc;
+namespace Aha\Mvc;
 
 class Loader {
 	
@@ -28,7 +28,7 @@ class Loader {
 	 * @param type $path
 	 * @return \Aha\Mvc\Loader
 	 */
-	public function __construct(string $namespace = null, string $path = null) {
+	public function __construct(\string $namespace = null, $path = null) {
 		if ( null !== $namespace && null !== $path ) {
 			$this->_arrMap[$namespace] = $path;
 		}
@@ -41,7 +41,7 @@ class Loader {
 	 * @param type $path
 	 * @return type
 	 */
-	public static function getInstance(string $namespace = null, string $path = null) {
+	public static function getInstance(\string $namespace = null, $path = null) {
 		if ( null === self::$_instance ) {
 			self::$_instance = new \Aha\Mvc\Loader($namespace, $path);
 		}
@@ -54,7 +54,7 @@ class Loader {
 	 * @param \Aha\Mvc\sring $path
 	 * @return \Aha\Mvc\Loader
 	 */
-	public function registerNamespace(string $namespace, sring $path) {
+	public function registerNamespace(\string $namespace, $path) {
 		$this->_arrMap[$namespace] = $path;
 		return $this;
 	}
@@ -64,7 +64,7 @@ class Loader {
 	 * @param string $namespace
 	 * @return boolean
 	 */
-	public function getPathByByNamespace(string $namespace) {
+	public function getPathByByNamespace(\string $namespace) {
 		if ( !isset($this->_arrMap[$namespace]) ) {
 			return false;
 		}
@@ -84,14 +84,14 @@ class Loader {
 		}
 		$className = trim($className, "\\");
 		if ( empty($className) ) {
-			throw new Exception("class name in empty!");
+			throw new \Exception("class name in empty!");
 		}
 		$classPatrs = array_map('ucfirst', explode('\\', $className));
 		if ( !isset($this->_arrMap[$classPatrs[0]]) ) {
-			throw new Exception("namespace {$classPatrs[0]} is not registered!");
+			throw new \Exception("when load class ${className}, detect namespace {$classPatrs[0]} is not registered!");
 		}
 		array_unshift($classPatrs, $this->_arrMap[$classPatrs[0]]);
-		$classFile = implode(DIRECTORY_SEPARATOR, $classPatrs);
+		$classFile = implode(DIRECTORY_SEPARATOR, $classPatrs) . AHA_EXT;
 		require_once $classFile;
 	}
 	

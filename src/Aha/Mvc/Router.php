@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace \Aha\Mvc;
+namespace Aha\Mvc;
 
 class Router {
 	
@@ -41,7 +41,7 @@ class Router {
 	 * @param string $delimeter
 	 * @return \Aha\Mvc\Router
 	 */
-	public function __construct(\Aha\Bootstrap $bootstrap, string $uri, string $delimeter='/') {
+	public function __construct(\Aha\Bootstrap $bootstrap, \string $uri, \string $delimeter='/') {
 		$this->_objBootstrap = $bootstrap;
 		$this->_uri			= str_replace(array(' ','.'),'',$uri);
 		$this->_delimiter	= $delimeter;
@@ -110,7 +110,7 @@ class Router {
 	 * @return type
 	 * @throws \Exception
 	 */
-	protected function _detect(array $arrElements, string $append = '' ) {
+	protected function _detect(array $arrElements, \string $append = '' ) {
 		$appNamespace = $this->_objBootstrap->getAppNamespace();
 		$appPath	  = $this->_objBootstrap->getLoader()->getPathByByNamespace($appNamespace);
 		
@@ -142,11 +142,11 @@ class Router {
 	public static function loadActionPaths(\Aha\Bootstrap $bootstrap) {
 		$appNamespace = $bootstrap->getAppNamespace();
 		$appPath	  = $bootstrap->getLoader()->getPathByByNamespace($appNamespace);
-		$actionPath	  = $appPath . DIRECTORY_SEPARATOR . 'actions';
+		$actionPath	  = $appPath . DIRECTORY_SEPARATOR . 'Actions';
 		
 		self::$_arrActions = array();
 		
-		$directoryIt = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($actionPath));
+		$directoryIt = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($actionPath));
 		$directoryIt->rewind();
 		while ($directoryIt->valid()) {
 			if ( !$directoryIt->isDot() && substr($directoryIt->key(), -4) === AHA_EXT ) {
@@ -162,7 +162,7 @@ class Router {
 	 * @param string $actionPath
 	 * @return boolean
 	 */
-	public static function validate(string $actionPath) {
+	public static function validate(\string $actionPath) {
 		if ( !in_array($actionPath, self::$_arrActions) ) {
 			return false;
 		}

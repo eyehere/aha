@@ -31,6 +31,9 @@ class Sample extends Http {
 	public function __construct() {
 		$server = new \swoole_http_server('0.0.0.0', 9601);
 		parent::__construct($server, 'Http-Sample');
+		$arrSetting = $this->getConfig();
+		$arrSetting['log_file'] = '../logs/Aha.log';
+		$server->set( $arrSetting );
 		$server->start();
 	}
 	
@@ -71,4 +74,4 @@ class Sample extends Http {
 	
 }
 
-$httpServer = new HttpSample();
+$httpServer = new \Application\Server\Sample();

@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace \Aha\Network;
+namespace Aha\Network;
 
 abstract class Server {
 	
@@ -36,7 +36,7 @@ abstract class Server {
 	 *			不会去做那种过度封装的工作 最大的自由留给开发者
 	 * @return \Aha\Server
 	 */
-	public function __construct(\swoole_server $server, string $appName='') {
+	public function __construct(\swoole_server $server, \string $appName='') {
 		$this->_objServer = $server;
 		if ( !empty($appName) ) {
 			$this->_appName = $appName;
@@ -111,7 +111,7 @@ abstract class Server {
 			'dispatch_mode'		=>	2,//(1:轮询模式2:固定模式3:抢占模式4:IP分配5:UID分配)
 			//'message_queue_key'=>	'',//(在ipc_mode=2或者task_ipc_mode=2时使用)
 			'backlog'			=>	128,//Listen队列的长度
-			'log_file'			=>	'/Users/luweijun/opt/base/goldenToad/log/aha.log',//错误日志文件
+			//'log_file'			=>	'./logs/Aha.log',//错误日志文件
 			'heartbeat_check_interval'=>60,//心跳检测间隔时间
 			'heartbeat_idle_time'=>	600,//连接最大允许空闲时间
 			'open_eof_check'	 =>	true,//打开eof检测
@@ -155,7 +155,7 @@ abstract class Server {
 	 * 在onWorkerStart之前载入公共的不易改变的代码：所有worker共享，不需要额外的内存
 	 * 想用$server->reload()重载代码，必须在onWorkerStart中require业务文件
 	 */
-	public function onWorkerStart(\swoole_server $server, int $workerId) {
+	public function onWorkerStart(\swoole_server $server, \int $workerId) {
 		if ( $workerId > $this->_objServer->setting['worker_num'] ) {
 			swoole_set_process_name($this->_appName .'-Task-'.$workerId);
 		} else {
@@ -170,14 +170,14 @@ abstract class Server {
 	 * @param int $taskId
 	 * @param string $data
 	 */
-	public function onFinish(\swoole_server $server, int $taskId, string $data) {
+	public function onFinish(\swoole_server $server, \int $taskId, \string $data) {
 		
 	}
 	
 	/**
 	 * @brief 在worker进程终止的时候发生，可以回收worker进程申请的各类资源
 	 */
-	public function onWorkerStop(\swoole_server $server, int $workerId) {
+	public function onWorkerStop(\swoole_server $server, \int $workerId) {
 		
 	}
 	
@@ -186,7 +186,7 @@ abstract class Server {
 	 * $taskId和$fromId组合起来才是全局唯一的，不同的worker进程投递的任务ID可能会相同
 	 * 通过return触发worker进程的onFinish函数，表示投递task完成
 	 */
-	public function onTask(\swoole_server $server, int $taskId, int $fromId, string $data) {
+	public function onTask(\swoole_server $server, \int $taskId, \int $fromId, \string $data) {
 		
 	}
 	
@@ -194,7 +194,7 @@ abstract class Server {
 	 * @brief 当工作进程收到sendMessage发送的管道消息时会触发onPipeMessage事件
 	 * worker/task进程都可能触发
 	 */
-	public function onPipeMessage(\swoole_server $server, int $fromWorkerId, string $message) {
+	public function onPipeMessage(\swoole_server $server, \int $fromWorkerId, \string $message) {
 		
 	}
 	
@@ -221,7 +221,7 @@ abstract class Server {
 	 * @brief 定时器触发
 	 * $interval的值用来区分是哪个定时器触发的
 	 */
-	public function onTimer(\swooler_server $server, int $interval) {
+	public function onTimer(\swooler_server $server, \int $interval) {
 		
 	}
 	
@@ -229,7 +229,7 @@ abstract class Server {
 	 * @brief 当worker/task进程发生异常会在Manager进程内回调此函数
 	 * 主要用于监控和报警 很有可能遇到了致命错误或者coredump
 	 */
-	public function onWorkerError(\swoole_server $server, int $workerId, int $workerPid, int $exitCode) {
+	public function onWorkerError(\swoole_server $server, \int $workerId, \int $workerPid, \int $exitCode) {
 		
 	}
 	

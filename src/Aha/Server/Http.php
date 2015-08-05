@@ -15,7 +15,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace \Aha\Server;
+namespace Aha\Server;
 
 use \Aha\Network\Server;
 
@@ -27,7 +27,7 @@ class Http extends Server {
 	 *			不会去做那种过度封装的工作 最大的自由留给开发者
 	 * @return \Aha\Server
 	 */
-	public function __construct(\swoole_http_server $server, string $appName = '') {
+	public function __construct(\swoole_http_server $server, \string $appName = '') {
 		parent::__construct($server, $appName);
 		//HTTP_GLOBAL_ALL表示设置所有的超全局变量 使用超全局变量在异步非阻塞的模式下存在不可重入的问题
 		$this->_objServer->setGlobal(HTTP_GLOBAL_ALL, HTTP_GLOBAL_GET | HTTP_GLOBAL_POST);
@@ -57,7 +57,7 @@ class Http extends Server {
 	 * onClose回调函数如果发生了致命错误，会导致链接泄漏。
 	 * 通过netstat命令会看到大量的CLOSE_WAIT状态的TCP连接
 	 */
-	public function onClose(\swoole_server $server, int $fd, int $fromId) {
+	public function onClose(\swoole_server $server, \int $fd, \int $fromId) {
 		
 	}
 	

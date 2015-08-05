@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace \Aha\Mvc;
+namespace Aha\Mvc;
 
 class Config {
 	
@@ -41,7 +41,7 @@ class Config {
 	 */
 	protected function _initConfig() {
 		$appNamespace	= $this->_objBootstrap->getAppNamespace();
-		$appPath		= $this->_objBootstrap->getPathByByNamespace($appNamespace);
+		$appPath		= $this->_objBootstrap->getLoader()->getPathByByNamespace($appNamespace);
 		$configPath		= $appPath . DIRECTORY_SEPARATOR . 'Config';
 		if ( !is_dir($configPath) ) {
 			return;
@@ -63,7 +63,7 @@ class Config {
 	 * @param string $path
 	 * @return type
 	 */
-	protected function _loadConfig(string $path) {
+	protected function _loadConfig(\string $path) {
 		$direcotryIterator = new \DirectoryIterator($path);
 		foreach ( $direcotryIterator as $iteratorItem ) {
 			if ( ! ( $iteratorItem->isFile() && substr($iteratorItem->getFilename(), -4) === AHA_EXT ) ) {
@@ -87,7 +87,7 @@ class Config {
 	 * @param string $key
 	 * @return type
 	 */
-	public function get(string $section, string $key = '') {
+	public function get(\string $section, \string $key = '') {
 		$arrConfig = isset($this->_arrConfig[$section]) ? $this->_arrConfig[$section] : array();
 		if ( empty($key) ) {
 			return $arrConfig;
@@ -100,7 +100,7 @@ class Config {
 	 * @param string $name
 	 * @return type
 	 */
-	public function __get(string $name) {
+	public function __get(\string $name) {
 		$arrConfig = isset($this->_arrConfig[$name]) ? $this->_arrConfig[$name] : array();
 		return (object) $arrConfig;
 	}
