@@ -15,9 +15,9 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace Aha\Server;
+namespace \Aha\Server;
 
-use Aha\Network\Server;
+use \Aha\Network\Server;
 
 class Http extends Server {
 	

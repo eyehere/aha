@@ -15,7 +15,7 @@
   +----------------------------------------------------------------------+
 */
 namespace Application\Actions\Index\Index;
-use Aha\Mvc\Action;
+use \Aha\Mvc\Action;
 
 class Index extends Action {
 	

@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace Aha\Mvc;
+namespace \Aha\Mvc;
 
 abstract class Action {
 	
@@ -26,7 +26,7 @@ abstract class Action {
 	 * @param \Aha\Mvc\Aha\Mvc\Dispatcher $dispatcher
 	 * @return \Aha\Mvc\Action
 	 */
-	public function __construct(Aha\Mvc\Dispatcher $dispatcher) {
+	public function __construct(\Aha\Mvc\Dispatcher $dispatcher) {
 		$this->_objDispatcher = $dispatcher;
 		return $this;
 	}

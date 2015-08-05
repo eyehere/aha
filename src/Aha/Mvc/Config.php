@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace Aha\Mvc;
+namespace \Aha\Mvc;
 
 class Config {
 	
@@ -29,7 +29,7 @@ class Config {
 	 * @param \Aha\Mvc\Aha\Bootstrap $objBootstrap
 	 * @return \Aha\Mvc\Config
 	 */
-	public function __construct(Aha\Bootstrap $objBootstrap) {
+	public function __construct(\Aha\Bootstrap $objBootstrap) {
 		$this->_objBootstrap = $objBootstrap;
 		$this->_initConfig();
 		return $this;

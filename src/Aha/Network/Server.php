@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace Aha\Network;
+namespace \Aha\Network;
 
 abstract class Server {
 	

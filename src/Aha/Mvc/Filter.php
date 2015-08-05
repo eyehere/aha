@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace Aha\Mvc;
+namespace \Aha\Mvc;
 //Filter建议慎重使用，主要原因：框架运行变得重耦合，实现方不注意细节可能阻塞整个进程
 //init filter:在worker启动的时候 由开发者调用静态类的静态方法添加钩子
 //(注册的钩子需要考虑异步情况下的并发问题 避免因为并发下处理同一个对象带来麻烦)
@@ -79,7 +79,7 @@ class Filter {
 	 * @param array $data
 	 * @return string
 	 */
-	public function preRouter(Aha\Mvc\Dispatcher $dispatcher, array $data = array()) {
+	public function preRouter(\Aha\Mvc\Dispatcher $dispatcher, array $data = array()) {
 		if ( !isset($data['cbIndex']) ) {
 			$data['cbIndex'] = 0;
 		}
@@ -100,7 +100,7 @@ class Filter {
 	 * @param array $data
 	 * @return string
 	 */
-	public function postRouter(Aha\Mvc\Dispatcher $dispatcher, array $data = array()) {
+	public function postRouter(\Aha\Mvc\Dispatcher $dispatcher, array $data = array()) {
 		if ( !isset($data['cbIndex']) ) {
 			$data['cbIndex'] = 0;
 		}
@@ -121,7 +121,7 @@ class Filter {
 	 * @param array $data
 	 * @return string
 	 */
-	public function preDispatch(Aha\Mvc\Dispatcher $dispatcher, array $data = array()) {
+	public function preDispatch(\Aha\Mvc\Dispatcher $dispatcher, array $data = array()) {
 		if ( !isset($data['cbIndex']) ) {
 			$data['cbIndex'] = 0;
 		}
@@ -142,7 +142,7 @@ class Filter {
 	 * @param array $data
 	 * @return string
 	 */
-	public function postDispatch(Aha\Mvc\Dispatcher $dispatcher, array $data = array()) {
+	public function postDispatch(\Aha\Mvc\Dispatcher $dispatcher, array $data = array()) {
 		if ( !isset($data['cbIndex']) ) {
 			$data['cbIndex'] = 0;
 		}

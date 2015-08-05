@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace Aha\Mvc;
+namespace \Aha\Mvc;
 
 class Dispatcher {
 	
@@ -45,7 +45,7 @@ class Dispatcher {
 	 * @param \Aha\Mvc\Aha\Bootstrap $bootstrap
 	 * @return \Aha\Mvc\Dispatcher
 	 */
-	public function __construct(Aha\Bootstrap $bootstrap, string $protocal = 'http') {
+	public function __construct(\Aha\Bootstrap $bootstrap, string $protocal = 'http') {
 		$this->_objBootstrap = $bootstrap;
 		$this->_protocal	 = $protocal;
 		return $this;
@@ -114,9 +114,9 @@ class Dispatcher {
 	 * @param \Aha\Mvc\Aha\Mvc\Router $router
 	 * @return boolean
 	 */
-	public function dispatch(Aha\Mvc\Router $router) {
+	public function dispatch(\Aha\Mvc\Router $router) {
 		$this->_objRouter = $router;
-		$this->_objFilter = new Aha\Mvc\Filter();
+		$this->_objFilter = new \Aha\Mvc\Filter();
 		//filter 分发时候触发 pre router 钩子
 		$this->_objBootstrap->getFilter()->preRouter($this);
 	}
@@ -139,8 +139,8 @@ class Dispatcher {
 		$method	= $this->_objRouter->getMethod();
 		
 		$objAction = new $action();
-		if ( !is_subclass_of($objAction, 'Aha\\Mvc\\Action') ) {
-			throw new Exception( "class $action is not extends Aha\\Mvc\\Action" );
+		if ( !is_subclass_of($objAction,  \Aha\\Mvc\\Action') ) {
+			throw new Exception( "class $action is not extends \Aha\\Mvc\\Action" );
 		}
 		
 		call_user_func(array($objAction, 'before'), $this);

@@ -21,7 +21,7 @@ define('AHA_SRC_PATH', dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR 
 require_once AHA_SRC_PATH . '/Aha/Bootstrap.php';
 \Aha\Bootstrap::initLoader();
 
-use Aha\Server\Http;
+use \Aha\Server\Http;
 
 class Sample extends Http {
 	

@@ -44,7 +44,7 @@ class Bootstrap {
 	 */
 	public static function getInstance(string $appNamespace, string $environ = 'product') {
 		if ( null === self::$_instance ) {
-			self::$_instance = new Aha\Bootstrap($appNamespace, $environ);
+			self::$_instance = new \Aha\Bootstrap($appNamespace, $environ);
 		}
 		return self::$_instance;
 	}
@@ -106,7 +106,7 @@ class Bootstrap {
 	protected function _initFilter() {
 		define('AHA_DELINED', -1);//交给下一个处理流程处理
 		define('AHA_AGAIN', -2);//需要再次调度
-		$this->_objFilter = new Aha\Mvc\Filter();
+		$this->_objFilter = new \Aha\Mvc\Filter();
 	}
 
 	/**
@@ -168,7 +168,7 @@ class Bootstrap {
 		$this->_initFilter();
 		
 		//初始化router 注册action file
-		Aha\Mvc\Router::loadActionPaths($this);
+	 \Aha\Mvc\Router::loadActionPaths($this);
 		
 		return $this;
 	}

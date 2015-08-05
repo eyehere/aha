@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace Aha\Mvc;
+namespace \Aha\Mvc;
 
 class Router {
 	
@@ -41,7 +41,7 @@ class Router {
 	 * @param string $delimeter
 	 * @return \Aha\Mvc\Router
 	 */
-	public function __construct(Aha\Bootstrap $bootstrap, string $uri, string $delimeter='/') {
+	public function __construct(\Aha\Bootstrap $bootstrap, string $uri, string $delimeter='/') {
 		$this->_objBootstrap = $bootstrap;
 		$this->_uri			= str_replace(array(' ','.'),'',$uri);
 		$this->_delimiter	= $delimeter;
@@ -77,7 +77,7 @@ class Router {
 		
 		if ( empty($this->_uri) ) {
 			$this->_action = "${appNamespace}\\Actions\\Index\\Index";
-			if ( Aha\Mvc\Router::validate($defaultAction) ) {
+			if ( \Aha\Mvc\Router::validate($defaultAction) ) {
 				throw new \Exception("default uri {$this->_uri} not found");
 			}
 			return;
@@ -90,7 +90,7 @@ class Router {
 		$arrUriParts = array_map('ucfirst',array_filter(explode($this->_delimiter, $this->_uri)));
 		if ( empty($arrUriParts) ) {
 			$this->_action = "${appNamespace}\\Actions\\Index\\Index";
-			if ( Aha\Mvc\Router::validate($defaultAction) ) {
+			if ( \Aha\Mvc\Router::validate($defaultAction) ) {
 				throw new \Exception("default uri {$this->_uri} not found");
 			}
 			return;
@@ -139,7 +139,7 @@ class Router {
 	 * 这样在做路由的时候 检测路由是hash操作 不会有文件检测的io操作 更高效更快速
 	 * @param \Aha\Mvc\Aha\Bootstrap $bootstrap
 	 */
-	public static function loadActionPaths(Aha\Bootstrap $bootstrap) {
+	public static function loadActionPaths(\Aha\Bootstrap $bootstrap) {
 		$appNamespace = $bootstrap->getAppNamespace();
 		$appPath	  = $bootstrap->getLoader()->getPathByByNamespace($appNamespace);
 		$actionPath	  = $appPath . DIRECTORY_SEPARATOR . 'actions';
