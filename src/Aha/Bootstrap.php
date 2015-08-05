@@ -152,7 +152,7 @@ class Bootstrap {
 	/**
 	 * @brief application run main function
 	 * @return \Aha\Bootstrap
-	 * @throws Exception
+	 * @throws \Exception\
 	 */
 	public function run() {
 		$appPath = $this->_loader->getPathByByNamespace($this->_appNamespace);

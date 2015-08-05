@@ -75,7 +75,7 @@ class Loader {
 	 * @brief autoload 回调函数
 	 * @param type $className
 	 * @return type
-	 * @throws Exception
+	 * @throws \Exception\
 	 */
 	public function autoload($className) {
 		$className = trim($className);

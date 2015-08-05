@@ -64,7 +64,7 @@ class Sample extends Http {
 			$dispatcher = new \Aha\Mvc\Dispatcher($this->_objAha);
 			$dispatcher->setRequest($request)->setResponse($response);
 			$dispatcher->dispatch($router);
-		} catch (Exception $ex) {
+		} catch  \Exception\ $ex) {
 			$message = '[onRequest_callBack_excaption] [code]' . $ex->getCode() . ' [message]' .
 				$ex->getMessage() . '[file]' . $ex->getFile() . '[line]' . $ex->getLine() . PHP_EOL;
 			$response->status(500);

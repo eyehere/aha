@@ -67,7 +67,7 @@ class Router {
 	/**
 	 * @brief 路由解析
 	 * @return type
-	 * @throws Exception
+	 * @throws \Exception\
 	 */
 	public function route() {
 		$appNamespace = $this->_objBootstrap->getAppNamespace();
@@ -84,7 +84,7 @@ class Router {
 		}
 		
 		if ( !preg_match('/^[\w-]+$/', $this->_uri) ) {
-			throw new Exception("invalid uri {$this->_uri}");
+			throw new \Exception\("invalid uri {$this->_uri}");
 		}
 		
 		$arrUriParts = array_map('ucfirst',array_filter(explode($this->_delimiter, $this->_uri)));
@@ -97,7 +97,7 @@ class Router {
 		}
 		
 		if ( count($arrUriParts) > self::URI_MAX_DEPTH ) {
-			throw new Exception("uri {$this->_uri} is too long!");
+			throw new \Exception\("uri {$this->_uri} is too long!");
 		}
 		
 		$this->_detect($arrUriParts);

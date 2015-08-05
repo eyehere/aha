@@ -132,7 +132,7 @@ class Dispatcher {
 
 	/**
 	 * @brief 在preDispatch 中触发
-	 * @throws Exception
+	 * @throws \Exception\
 	 */
 	public function dispatchLoop() {
 		$action = $this->_objRouter->getAction();
@@ -140,7 +140,7 @@ class Dispatcher {
 		
 		$objAction = new $action();
 		if ( !is_subclass_of($objAction,  '\\Aha\\Mvc\\Action') ) {
-			throw new Exception( "class $action is not extends \Aha\\Mvc\\Action" );
+			throw new \Exception\( "class $action is not extends \Aha\\Mvc\\Action" );
 		}
 		
 		call_user_func(array($objAction, 'before'), $this);
