@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace Ala\Mvc;
+namespace Aha\Mvc;
 //Filter建议慎重使用，主要原因：框架运行变得重耦合，实现方不注意细节可能阻塞整个进程
 //init filter:在worker启动的时候 由开发者调用静态类的静态方法添加钩子
 //(注册的钩子需要考虑异步情况下的并发问题 避免因为并发下处理同一个对象带来麻烦)
@@ -36,7 +36,7 @@ class Filter {
 	/**
 	 * @brief 路由之前回调
 	 * @param type $callback  cbFn($dispatcher, $data=array('cbIndex'=>0,'callback'=>cbFn,...))
-	 * @return \Ala\Mvc\Filter
+	 * @return \Aha\Mvc\Filter
 	 */
 	public function registerPreRouter($callback) {
 		array_push($this->_arrPreRouter, $callback);
@@ -46,7 +46,7 @@ class Filter {
 	/**
 	 * @brief 路由之前回调
 	 * @param type $callback  cbFn($dispatcher, $data=array('cbIndex'=>0,'callback'=>cbFn,...))
-	 * @return \Ala\Mvc\Filter
+	 * @return \Aha\Mvc\Filter
 	 */
 	public function registerPostRouter($callback) {
 		array_push($this->_arrPostRouter, $callback);
@@ -56,7 +56,7 @@ class Filter {
 	/**
 	 * @brief 分发之前回调
 	 * @param type $callback  cbFn($dispatcher, $data=array('cbIndex'=>0,'callback'=>cbFn,...))
-	 * @return \Ala\Mvc\Filter
+	 * @return \Aha\Mvc\Filter
 	 */
 	public function registerPreDispatch($callback) {
 		array_push($this->_arrPreDispatch, $callback);
@@ -66,7 +66,7 @@ class Filter {
 	/**
 	 * @brief 分发之后回调(注意：为了框架雨业务解耦，这个过程在调用分发之后会立即执行 基本认为与分发过程是并行执行)
 	 * @param type $callback  cbFn($dispatcher, $data=array('cbIndex'=>0,'callback'=>cbFn,...))
-	 * @return \Ala\Mvc\Filter
+	 * @return \Aha\Mvc\Filter
 	 */
 	public function registerPostDispatch($callback) {
 		array_push($this->_arrPostDispatch, $callback);
@@ -75,7 +75,7 @@ class Filter {
 	
 	/**
 	 * @brief 所有路由之前注册的回调的call 之后是路由
-	 * @param \Ala\Mvc\Aha\Mvc\Dispatcher $dispatcher
+	 * @param \Aha\Mvc\Aha\Mvc\Dispatcher $dispatcher
 	 * @param array $data
 	 * @return string
 	 */
@@ -96,7 +96,7 @@ class Filter {
 	
 	/**
 	 * @brief 路由之后注册的回调的call 之后是preDispatch
-	 * @param \Ala\Mvc\Aha\Mvc\Dispatcher $dispatcher
+	 * @param \Aha\Mvc\Aha\Mvc\Dispatcher $dispatcher
 	 * @param array $data
 	 * @return string
 	 */
@@ -117,7 +117,7 @@ class Filter {
 	
 	/**
 	 * @brief 分发之前的操作 之后是call action
-	 * @param \Ala\Mvc\Aha\Mvc\Dispatcher $dispatcher
+	 * @param \Aha\Mvc\Aha\Mvc\Dispatcher $dispatcher
 	 * @param array $data
 	 * @return string
 	 */
@@ -138,7 +138,7 @@ class Filter {
 	
 	/**
 	 * @brief 分发之后的操作 之前是call action
-	 * @param \Ala\Mvc\Aha\Mvc\Dispatcher $dispatcher
+	 * @param \Aha\Mvc\Aha\Mvc\Dispatcher $dispatcher
 	 * @param array $data
 	 * @return string
 	 */

@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace Ala\Mvc;
+namespace Aha\Mvc;
 
 class Dispatcher {
 	
@@ -42,8 +42,8 @@ class Dispatcher {
 	
 	/**
 	 * @brief 初始化dispatcher
-	 * @param \Ala\Mvc\Aha\Bootstrap $bootstrap
-	 * @return \Ala\Mvc\Dispatcher
+	 * @param \Aha\Mvc\Aha\Bootstrap $bootstrap
+	 * @return \Aha\Mvc\Dispatcher
 	 */
 	public function __construct(Aha\Bootstrap $bootstrap, string $protocal = 'http') {
 		$this->_objBootstrap = $bootstrap;
@@ -111,7 +111,7 @@ class Dispatcher {
 
 	/**
 	 * @brief 路由分发
-	 * @param \Ala\Mvc\Aha\Mvc\Router $router
+	 * @param \Aha\Mvc\Aha\Mvc\Router $router
 	 * @return boolean
 	 */
 	public function dispatch(Aha\Mvc\Router $router) {

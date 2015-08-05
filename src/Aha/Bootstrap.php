@@ -15,7 +15,7 @@
   +----------------------------------------------------------------------+
 */
 
-namespace Ala;
+namespace Aha;
 
 class Bootstrap {
 	
@@ -53,7 +53,7 @@ class Bootstrap {
 	 * @brief 应用引导程序初始化
 	 * @param string $appNamespace
 	 * @param string $environ
-	 * @return \Ala\Bootstrap
+	 * @return \Aha\Bootstrap
 	 */
 	public function __construct(string $appNamespace, string $environ = 'product') {
 		$this->_appNamespace	= $appNamespace;
@@ -151,7 +151,7 @@ class Bootstrap {
 
 	/**
 	 * @brief application run main function
-	 * @return \Ala\Bootstrap
+	 * @return \Aha\Bootstrap
 	 * @throws Exception
 	 */
 	public function run() {
