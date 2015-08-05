@@ -17,7 +17,7 @@
 
 namespace Application\Server;
 
-define('AHA_SRC_PATH', dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . 'src');
+define('AHA_SRC_PATH', dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . 'src');
 require_once AHA_SRC_PATH . '/Aha/Bootstrap.php';
 \Aha\Bootstrap::initLoader();
 

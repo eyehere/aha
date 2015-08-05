@@ -85,7 +85,7 @@ class Bootstrap {
 		define('AHA_EXT', '.php');
 		require_once AHA_PATH . '/Aha/Mvc/Loader.php';
 		
-		$loader = Aha\Mvc\Loader::getInstance();
+		$loader = \Aha\Mvc\Loader::getInstance();
 		$loader->registerNamespace('Aha', AHA_PATH);
 
 		spl_autoload_register( array($this->_loader, 'autoload') );
