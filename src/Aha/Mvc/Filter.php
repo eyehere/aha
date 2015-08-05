@@ -106,7 +106,7 @@ class Filter {
 		}
 		$cbIndex = $data['cbIndex'];
 		if ( !isset($this->_arrPostRouter[$cbIndex]) ) {
-			$this->preDispatch($dispatcher);
+			return $this->preDispatch($dispatcher);
 			//return AHA_DECLINED;
 		}
 		$data['cbIndex']++;

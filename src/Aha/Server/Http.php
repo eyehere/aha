@@ -30,7 +30,7 @@ class Http extends Server {
 	public function __construct(\swoole_http_server $server, \string $appName = '') {
 		parent::__construct($server, $appName);
 		//HTTP_GLOBAL_ALL表示设置所有的超全局变量 使用超全局变量在异步非阻塞的模式下存在不可重入的问题
-		$this->_objServer->setGlobal(HTTP_GLOBAL_ALL, HTTP_GLOBAL_GET | HTTP_GLOBAL_POST);
+		//$this->_objServer->setGlobal(HTTP_GLOBAL_ALL, HTTP_GLOBAL_GET | HTTP_GLOBAL_POST);
 		return $this;
 	}
 	

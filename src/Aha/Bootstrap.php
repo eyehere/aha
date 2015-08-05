@@ -104,7 +104,7 @@ class Bootstrap {
 	 * @brief 初始化过滤器
 	 */
 	protected function _initFilter() {
-		define('AHA_DELINED', -1);//交给下一个处理流程处理
+		define('AHA_DECLINED', -1);//交给下一个处理流程处理
 		define('AHA_AGAIN', -2);//需要再次调度
 		$this->_objFilter = new \Aha\Mvc\Filter();
 	}

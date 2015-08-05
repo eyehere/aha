@@ -35,7 +35,7 @@ abstract class Action {
 	 * @brief before execute
 	 * block not allowed when init if extends
 	 */
-	final public function brefore(\Aha\Mvc\Dispatcher $dispatcher) {
+	final public function before(\Aha\Mvc\Dispatcher $dispatcher) {
 		$this->_objDispatcher = $dispatcher;
 		$this->excute();
 		$this->after();
@@ -51,7 +51,7 @@ abstract class Action {
 	 * block not allowed when init if extends
 	 */
 	final public function after() {
-		$this->_objDispatcher->getBootstrap()->getFilter()->postDispatch($this);
+		$this->_objDispatcher->getBootstrap()->getFilter()->postDispatch($this->_objDispatcher);
 	}
 	
 }

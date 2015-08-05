@@ -43,7 +43,7 @@ class Router {
 	 */
 	public function __construct(\Aha\Bootstrap $bootstrap, \string $uri, \string $delimeter='/') {
 		$this->_objBootstrap = $bootstrap;
-		$this->_uri			= str_replace(array(' ','.'),'',$uri);
+		$this->_uri			= trim(str_replace(array(' ','.'),'',$uri),$delimeter);
 		$this->_delimiter	= $delimeter;
 		return $this;
 	}
@@ -73,10 +73,10 @@ class Router {
 		$appNamespace = $this->_objBootstrap->getAppNamespace();
 		$appPath	  = $this->_objBootstrap->getLoader()->getPathByByNamespace($appNamespace);
 		
-		$defaultAction = explode(DIRECTORY_SEPARATOR, array($appPath, $appNamespace, 'Actions', 'Index', 'Index'));
+		$defaultAction = implode(DIRECTORY_SEPARATOR, array($appPath, $appNamespace, 'Actions', 'Index', 'Index'));
 		
 		if ( empty($this->_uri) ) {
-			$this->_action = "${appNamespace}\\Actions\\Index\\Index";
+			$this->_action = "${appNamespace}\\Actions\\Index\\Index\\Index";
 			if ( \Aha\Mvc\Router::validate($defaultAction) ) {
 				throw new \Exception("default uri {$this->_uri} not found");
 			}
@@ -84,12 +84,12 @@ class Router {
 		}
 		
 		if ( !preg_match('/^[\w-]+$/', $this->_uri) ) {
-			throw new \Exception\("invalid uri {$this->_uri}");
+			throw new \Exception("invalid uri {$this->_uri}");
 		}
 		
 		$arrUriParts = array_map('ucfirst',array_filter(explode($this->_delimiter, $this->_uri)));
 		if ( empty($arrUriParts) ) {
-			$this->_action = "${appNamespace}\\Actions\\Index\\Index";
+			$this->_action = "${appNamespace}\\Actions\\Index\\Index\\Index";
 			if ( \Aha\Mvc\Router::validate($defaultAction) ) {
 				throw new \Exception("default uri {$this->_uri} not found");
 			}
@@ -97,7 +97,7 @@ class Router {
 		}
 		
 		if ( count($arrUriParts) > self::URI_MAX_DEPTH ) {
-			throw new \Exception\("uri {$this->_uri} is too long!");
+			throw new \Exception("uri {$this->_uri} is too long!");
 		}
 		
 		$this->_detect($arrUriParts);
@@ -120,7 +120,7 @@ class Router {
 		$arrUriParts  = $arrElements;
 		array_unshift($arrUriParts, $appNamespace);
 		
-		$actionPath = explode(DIRECTORY_SEPARATOR, $arrUriParts);
+		$actionPath = implode(DIRECTORY_SEPARATOR, $arrUriParts);
 		if ( in_array($appPath . DIRECTORY_SEPARATOR . $actionPath, self::$_arrActions) ) {
 			$this->_action = explode('\\', $arrUriParts);
 			return;
@@ -142,7 +142,7 @@ class Router {
 	public static function loadActionPaths(\Aha\Bootstrap $bootstrap) {
 		$appNamespace = $bootstrap->getAppNamespace();
 		$appPath	  = $bootstrap->getLoader()->getPathByByNamespace($appNamespace);
-		$actionPath	  = $appPath . DIRECTORY_SEPARATOR . 'Actions';
+		$actionPath	  = $appPath . DIRECTORY_SEPARATOR . $appNamespace . DIRECTORY_SEPARATOR . 'Actions';
 		
 		self::$_arrActions = array();
 		
