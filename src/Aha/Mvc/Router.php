@@ -128,7 +128,7 @@ class Router {
 			return;
 		}
 		
-		if (count($arrUriParts) === self::URI_MAX_DEPTH ) {
+		if (count($arrUriParts) === self::URI_MAX_DEPTH + 2 ) {
 			throw new \Exception("uri {$this->_uri} not found");
 		}
 		
