@@ -43,7 +43,7 @@ class Router {
 	 */
 	public function __construct(\Aha\Bootstrap $bootstrap, \string $uri, \string $delimeter='/') {
 		$this->_objBootstrap = $bootstrap;
-		$this->_uri			= trim(str_replace(array(' ','.'),'',$uri),$delimeter);
+		$this->_uri			= trim(str_replace(array(' ','.'),'',$uri), "${delimeter}/");
 		$this->_delimiter	= $delimeter;
 		return $this;
 	}
@@ -76,20 +76,20 @@ class Router {
 		$defaultAction = implode(DIRECTORY_SEPARATOR, array($appPath, $appNamespace, 'Actions', 'Index', 'Index'));
 		
 		if ( empty($this->_uri) ) {
-			$this->_action = "${appNamespace}\\Actions\\Index\\Index\\Index";
+			$this->_action = "\\${appNamespace}\\Actions\\Index\\Index\\Index";
 			if ( \Aha\Mvc\Router::validate($defaultAction) ) {
 				throw new \Exception("default uri {$this->_uri} not found");
 			}
 			return;
 		}
 		
-		if ( !preg_match('/^[\w-]+$/', $this->_uri) ) {
+		if ( !preg_match('/^[\w\/-]+$/', $this->_uri) ) {
 			throw new \Exception("invalid uri {$this->_uri}");
 		}
 		
 		$arrUriParts = array_map('ucfirst',array_filter(explode($this->_delimiter, $this->_uri)));
 		if ( empty($arrUriParts) ) {
-			$this->_action = "${appNamespace}\\Actions\\Index\\Index\\Index";
+			$this->_action = "\\${appNamespace}\\Actions\\Index\\Index\\Index";
 			if ( \Aha\Mvc\Router::validate($defaultAction) ) {
 				throw new \Exception("default uri {$this->_uri} not found");
 			}
@@ -99,6 +99,8 @@ class Router {
 		if ( count($arrUriParts) > self::URI_MAX_DEPTH ) {
 			throw new \Exception("uri {$this->_uri} is too long!");
 		}
+		
+		array_unshift($arrUriParts, 'Actions');
 		
 		$this->_detect($arrUriParts);
 	}
@@ -122,7 +124,7 @@ class Router {
 		
 		$actionPath = implode(DIRECTORY_SEPARATOR, $arrUriParts);
 		if ( in_array($appPath . DIRECTORY_SEPARATOR . $actionPath, self::$_arrActions) ) {
-			$this->_action = explode('\\', $arrUriParts);
+			$this->_action = '\\' . implode('\\', $arrUriParts);
 			return;
 		}
 		
@@ -150,7 +152,7 @@ class Router {
 		$directoryIt->rewind();
 		while ($directoryIt->valid()) {
 			if ( !$directoryIt->isDot() && substr($directoryIt->key(), -4) === AHA_EXT ) {
-				array_push(self::$_arrActions, basename($directoryIt->key(), AHA_EXT));
+				array_push(self::$_arrActions, rtrim($directoryIt->key(), AHA_EXT));
 			}
 			$directoryIt->next();
 		}
