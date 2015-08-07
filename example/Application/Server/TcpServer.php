@@ -22,7 +22,7 @@ require_once AHA_SRC_PATH . '/Aha/Bootstrap.php';
 
 use Aha\Server\Tcp;
 
-class HttpServer extends Tcp {
+class TcpServer extends Tcp {
 	
 	//Aha实例 
 	private $_objAha = null;

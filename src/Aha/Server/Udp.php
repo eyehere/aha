@@ -26,8 +26,8 @@ class Udp extends Server {
 	 *			不会去做那种过度封装的工作 最大的自由留给开发者
 	 * @return \Aha\Server
 	 */
-	public function __construct(\swoole_server $server, \string $appName = '') {
-		parent::__construct($server, $appName);
+	public function __construct(\swoole_server $server, \string $appName = '', array $arrSetting = array() ) {
+		parent::__construct($server, $appName, $arrSetting);
 		return $this;
 	}
 	
