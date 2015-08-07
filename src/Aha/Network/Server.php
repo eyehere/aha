@@ -36,13 +36,13 @@ abstract class Server {
 	 *			不会去做那种过度封装的工作 最大的自由留给开发者
 	 * @return \Aha\Server
 	 */
-	public function __construct(\swoole_server $server, \string $appName='') {
+	public function __construct(\swoole_server $server, \string $appName='', array $arrSetting = array() ) {
 		$this->_objServer = $server;
 		if ( !empty($appName) ) {
 			$this->_appName = $appName;
 		}
 		if ( !isset($this->_objServer->setting) ) {
-			$this->_objServer->set( $this->getConfig() );
+			$this->_objServer->set( $this->getConfig($arrSetting) );
 		}
 		$this->_initEvents();
 		return $this;
@@ -87,9 +87,9 @@ abstract class Server {
 	/**
 	 * @brief 获取server的配置选项
 	 */
-	public function getConfig() {
+	public function getConfig( array $arrSetting = array() ) {
 		if ( empty($this->_config) ) {
-			$this->setConfig(array());
+			$this->setConfig($arrSetting);
 		}
 		return $this->_config;
 	}

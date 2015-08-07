@@ -1,7 +1,7 @@
 <?php
 /*
   +----------------------------------------------------------------------+
-  | Application                                                                  |
+  | Application                                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 2.0 of the Apache license,    |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -14,24 +14,23 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-
 namespace Application\Server;
 
 define('AHA_SRC_PATH', dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . 'src');
 require_once AHA_SRC_PATH . '/Aha/Bootstrap.php';
 \Aha\Bootstrap::initLoader();
 
-use \Aha\Server\Http;
+use Aha\Server\Udp;
 
-class HttpServer extends Http {
+class UdpServer extends Udp {
 	
 	//Aha实例 
 	private $_objAha = null;
 
 	public function __construct() {
-		$server = new \swoole_http_server('0.0.0.0', 9601);
+		$server = new \swoole_server('0.0.0.0', 9603, SWOOLE_PROCESS, SWOOLE_SOCK_UDP);
 		$arrSetting = array('log_file' => dirname(__DIR__) .'/Logs/Aha.log');
-		parent::__construct($server, 'HttpServer', $arrSetting);
+		parent::__construct($server, 'UdpServer', $arrSetting);
 		$server->start();
 	}
 	
@@ -62,33 +61,34 @@ class HttpServer extends Http {
 	}
 	
 	/**
-	 * @brief 请求初始化
-	 * @param \swoole_http_request $request
-	 * @param \swoole_http_response $response
+	 * @brief Udp 请求初始化
+	 * @param \swoole_server $server
+	 * @param \string $data
+	 * @param type $clientInfo
 	 */
-	public function onRequest(\swoole_http_request $request, \swoole_http_response $response) {
-		parent::onRequest($request, $response);
+	public function onPacket(\swoole_server $server, \string $data, $clientInfo) {
+		parent::onPacket($server, $data, $clientInfo);
 		try {
-			$uri	= isset($request->server['request_uri']) ? $request->server['request_uri'] : '';
-			$router = new \Aha\Mvc\Router($this->_objAha, $uri);
-			$dispatcher = new \Aha\Mvc\Dispatcher($this->_objAha);
-			$dispatcher->setRequest($request)->setResponse($response);
+			$arrRequest = json_decode($data);
+			$cmd	= isset($arrRequest['cmd']) ? $arrRequest['cmd'] : '';
+			$router = new \Aha\Mvc\Router($this->_objAha, $cmd, '-');
+			$dispatcher = new \Aha\Mvc\Dispatcher($this->_objAha, 'udp');
+			$dispatcher->setUdpPackage($data)->setUdpClientInfo($clientInfo);
 			$dispatcher->dispatch($router);
 		} catch  (\Exception $ex) {
 			$message = '[onRequest_callBack_excaption] [code]' . $ex->getCode() . ' [message]' .
 				$ex->getMessage() . '[file]' . $ex->getFile() . '[line]' . $ex->getLine() . PHP_EOL;
 			switch ( $ex->getCode() ) {
 				case AHA_ROUTER_EXCEPTION : 
-					$response->status(404);
+					$server->send($clientInfo['server_socket '], "[status] 404 $message");
 					break;
 				default :
-					$response->status(500);
+					$server->send($clientInfo['server_socket '], "[status] 500 $message");
 					break;
 			}
-			$response->end($message);
 		}
 	}
-	
+
 }
 
-$httpServer = new \Application\Server\HttpServer();
+$httpServer = new \Application\Server\UdpServer();

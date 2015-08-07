@@ -14,24 +14,23 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-
 namespace Application\Server;
 
 define('AHA_SRC_PATH', dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . 'src');
 require_once AHA_SRC_PATH . '/Aha/Bootstrap.php';
 \Aha\Bootstrap::initLoader();
 
-use \Aha\Server\Http;
+use Aha\Server\Tcp;
 
-class HttpServer extends Http {
+class HttpServer extends Tcp {
 	
 	//Aha实例 
 	private $_objAha = null;
 
 	public function __construct() {
-		$server = new \swoole_http_server('0.0.0.0', 9601);
+		$server = new \swoole_server('0.0.0.0', 9602, SWOOLE_PROCESS, SWOOLE_SOCK_TCP);
 		$arrSetting = array('log_file' => dirname(__DIR__) .'/Logs/Aha.log');
-		parent::__construct($server, 'HttpServer', $arrSetting);
+		parent::__construct($server, 'TcpServer', $arrSetting);
 		$server->start();
 	}
 	
@@ -63,32 +62,34 @@ class HttpServer extends Http {
 	
 	/**
 	 * @brief 请求初始化
-	 * @param \swoole_http_request $request
-	 * @param \swoole_http_response $response
+	 * @param \swoole_server $server
+	 * @param \int $fd
+	 * @param \int $fromId
+	 * @param \string $data
 	 */
-	public function onRequest(\swoole_http_request $request, \swoole_http_response $response) {
-		parent::onRequest($request, $response);
+	public function onReceive(\swoole_server $server, \int $fd, \int $fromId, \string $data) {
+		parent::onReceive($server, $fd, $fromId, $data);
 		try {
-			$uri	= isset($request->server['request_uri']) ? $request->server['request_uri'] : '';
-			$router = new \Aha\Mvc\Router($this->_objAha, $uri);
-			$dispatcher = new \Aha\Mvc\Dispatcher($this->_objAha);
-			$dispatcher->setRequest($request)->setResponse($response);
+			$arrRequest = json_decode($data);
+			$cmd	= isset($arrRequest['cmd']) ? $arrRequest['cmd'] : '';
+			$router = new \Aha\Mvc\Router($this->_objAha, $cmd, '-');
+			$dispatcher = new \Aha\Mvc\Dispatcher($this->_objAha, 'tcp');
+			$dispatcher->setTcpClientFd($fd)->setTcpFromId($fromId)->setTcpPackage($data);
 			$dispatcher->dispatch($router);
 		} catch  (\Exception $ex) {
 			$message = '[onRequest_callBack_excaption] [code]' . $ex->getCode() . ' [message]' .
 				$ex->getMessage() . '[file]' . $ex->getFile() . '[line]' . $ex->getLine() . PHP_EOL;
 			switch ( $ex->getCode() ) {
 				case AHA_ROUTER_EXCEPTION : 
-					$response->status(404);
+					$server->send($fd, "[status] 404 $message");
 					break;
 				default :
-					$response->status(500);
+					$server->send($fd, "[status] 500 $message");
 					break;
 			}
-			$response->end($message);
 		}
 	}
-	
+
 }
 
-$httpServer = new \Application\Server\HttpServer();
+$httpServer = new \Application\Server\TcpServer();

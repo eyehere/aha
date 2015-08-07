@@ -33,10 +33,16 @@ class Dispatcher {
 	private $_response	= null;
 	
 	//=========tcp protocal===================
+	private $_tcpClientFd = null;
 	
+	private $_tcpFromId	= null;
+	
+	private $_tcpPackage = null;
 	
 	//=========udp protocal===================
+	private $_udpPackage = null;
 	
+	private $_udpClientInfo = null;
 	
 	//=========websocket======================
 	
@@ -107,6 +113,96 @@ class Dispatcher {
 	 */
 	public function getResponse() {
 		return $this->_response;
+	}
+	
+	/**
+	 * @brief tcp set fd
+	 * @param \int $fd
+	 * @return \Aha\Mvc\Dispatcher
+	 */
+	public function setTcpClientFd(\int $fd) {
+		$this->_tcpClientFd = $fd;
+		return $this;
+	}
+	
+	/**
+	 * @brief tcp get fd
+	 * @return type
+	 */
+	public function getTcpClientFd() {
+		return $this->_tcpClientFd;
+	}
+	
+	/**
+	 * @brief tcp set fromId
+	 * @param \int $fromId
+	 * @return \Aha\Mvc\Dispatcher
+	 */
+	public function setTcpFromId(\int $fromId) {
+		$this->_tcpFromId = $fromId;
+		return $this;
+	}
+	
+	/**
+	 * @brief tcp get fromId 
+	 * @return type
+	 */
+	public function getTcpFromId() {
+		return $this->_tcpFromId;
+	}
+	
+	/**
+	 * @brief tcp set package
+	 * @param \string $data
+	 * @return \Aha\Mvc\Dispatcher
+	 */
+	public function setTcpPackage(\string $data) {
+		$this->_tcpPackage = $data;
+		return $this;
+	}
+	
+	/**
+	 * @brief tcp get package
+	 * @return type
+	 */
+	public function getTcpPackage() {
+		return $this->_tcpPackage;
+	}
+	
+	/**
+	 * @brief udp set package
+	 * @param \string $data
+	 * @return \Aha\Mvc\Dispatcher
+	 */
+	public function setUdpPackage(\string $data) {
+		$this->_udpPackage = $data;
+		return $this;
+	}
+	
+	/**
+	 * @brief udp get package
+	 * @return type
+	 */
+	public function getUdpPackage() {
+		return $this->_udpPackage;
+	}
+	
+	/**
+	 * @brief udp set clientInfo
+	 * @param array $clientInfo
+	 * @return \Aha\Mvc\Dispatcher
+	 */
+	public function setUdpClientInfo(array $clientInfo) {
+		$this->_udpClientInfo = $clientInfo;
+		return $this;
+	}
+	
+	/**
+	 * @brief udp get clientInfo
+	 * @return type
+	 */
+	public function getUdpClientInfo() {
+		return $this->_udpClientInfo;
 	}
 
 	/**
