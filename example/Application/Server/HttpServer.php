@@ -23,7 +23,7 @@ require_once AHA_SRC_PATH . '/Aha/Bootstrap.php';
 
 use \Aha\Server\Http;
 
-class Sample extends Http {
+class HttpServer extends Http {
 	
 	//Aha实例 
 	private $_objAha = null;
@@ -32,7 +32,7 @@ class Sample extends Http {
 		$server = new \swoole_http_server('0.0.0.0', 9601);
 		parent::__construct($server, 'Http-Sample');
 		$arrSetting = $this->getConfig();
-		$arrSetting['log_file'] = '../logs/Aha.log';
+		$arrSetting['log_file'] = dirname(__DIR__) .'/Logs/Aha.log';
 		$server->set( $arrSetting );
 		$server->start();
 	}
@@ -93,4 +93,4 @@ class Sample extends Http {
 	
 }
 
-$httpServer = new \Application\Server\Sample();
+$httpServer = new \Application\Server\HttpServer();
