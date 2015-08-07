@@ -1,5 +1,6 @@
 #! /bin/sh
 
+php_BIN=/home/luweijun/opt/soft/php/bin/php 
 server_BIN=../Server/HttpServer.php
 master_PID=../Var/httpServer-Master.pid
 manager_PID=../Var/httpServer-Manager.pid
@@ -8,7 +9,7 @@ case "$1" in
 	start)
 		echo -n "Starting ... "
 
-		$server_BIN
+		$php_BIN $server_BIN
 
 		if [ "$?" != 0 ] ; then
 			echo " failed ..."
