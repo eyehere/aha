@@ -92,6 +92,9 @@ class Loader {
 		}
 		array_unshift($classPatrs, $this->_arrMap[$classPatrs[0]]);
 		$classFile = implode(DIRECTORY_SEPARATOR, $classPatrs) . AHA_EXT;
+		if ( ! file_exists($classFile) ) {
+			throw new \Exception("when load, class ${className} is not find!");
+		}
 		require_once $classFile;
 	}
 	

@@ -78,26 +78,26 @@ class Router {
 		if ( empty($this->_uri) ) {
 			$this->_action = "\\${appNamespace}\\Actions\\Index\\Index\\Index";
 			if ( \Aha\Mvc\Router::validate($defaultAction) ) {
-				throw new \Exception("default uri {$this->_uri} not found");
+				throw new \Exception("default uri {$this->_uri} not found", AHA_ROUTER_EXCEPTION);
 			}
 			return;
 		}
 		
 		if ( !preg_match('/^[\w\/-]+$/', $this->_uri) ) {
-			throw new \Exception("invalid uri {$this->_uri}");
+			throw new \Exception("invalid uri {$this->_uri}", AHA_ROUTER_EXCEPTION);
 		}
 		
 		$arrUriParts = array_map('ucfirst',array_filter(explode($this->_delimiter, $this->_uri)));
 		if ( empty($arrUriParts) ) {
 			$this->_action = "\\${appNamespace}\\Actions\\Index\\Index\\Index";
 			if ( \Aha\Mvc\Router::validate($defaultAction) ) {
-				throw new \Exception("default uri {$this->_uri} not found");
+				throw new \Exception("default uri {$this->_uri} not found", AHA_ROUTER_EXCEPTION);
 			}
 			return;
 		}
 		
 		if ( count($arrUriParts) > self::URI_MAX_DEPTH ) {
-			throw new \Exception("uri {$this->_uri} is too long!");
+			throw new \Exception("uri {$this->_uri} is too long!", AHA_ROUTER_EXCEPTION);
 		}
 		
 		array_unshift($arrUriParts, 'Actions');
@@ -128,8 +128,8 @@ class Router {
 			return;
 		}
 		
-		if (count($arrUriParts) === self::URI_MAX_DEPTH + 2 ) {
-			throw new \Exception("uri {$this->_uri} not found");
+		if (count($arrUriParts) >= self::URI_MAX_DEPTH + 2 ) {
+			throw new \Exception("uri {$this->_uri} not found", AHA_ROUTER_EXCEPTION);
 		}
 		
 		return $this->_detect($arrElements, 'Index');

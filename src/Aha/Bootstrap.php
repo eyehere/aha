@@ -58,10 +58,18 @@ class Bootstrap {
 	public function __construct(\string $appNamespace, \string $environ = 'product') {
 		$this->_appNamespace	= $appNamespace;
 		$this->_environ			= $environ;
+		$this->_initEnv();
 		$this->_initLoader();
 		return $this;
 	}
 	
+	/**
+	 * @brief 环境初始化相关
+	 */
+	protected function _initEnv() {
+		define('AHA_ROUTER_EXCEPTION', 100001);//router exception
+	}
+
 	/**
 	 * @brief 初始化自动加载器
 	 */

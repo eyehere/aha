@@ -67,7 +67,14 @@ class Sample extends Http {
 		} catch  (\Exception $ex) {
 			$message = '[onRequest_callBack_excaption] [code]' . $ex->getCode() . ' [message]' .
 				$ex->getMessage() . '[file]' . $ex->getFile() . '[line]' . $ex->getLine() . PHP_EOL;
-			$response->status(500);
+			switch ( $ex->getCode() ) {
+				case AHA_ROUTER_EXCEPTION : 
+					$response->status(404);
+					break;
+				default :
+					$response->status(500);
+					break;
+			}
 			$response->end($message);
 		}
 	}
