@@ -18,6 +18,7 @@ namespace Aha\Mvc;
 //Filter建议慎重使用，主要原因：框架运行变得重耦合，实现方不注意细节可能阻塞整个进程
 //init filter:在worker启动的时候 由开发者调用静态类的静态方法添加钩子
 //(注册的钩子需要考虑异步情况下的并发问题 避免因为并发下处理同一个对象带来麻烦)
+//如果想在filter的hooks中中断请求不继续往下处理后续逻辑，请抛出异常，自定义异常类型并捕获
 class Filter {
 	
 	//路由之前
@@ -86,7 +87,6 @@ class Filter {
 		$cbIndex = $data['cbIndex'];
 		if ( !isset($this->_arrPreRouter[$cbIndex]) ) {
 			return $dispatcher->routeLoop();
-			//return AHA_DECLINED;
 		}
 		$data['cbIndex']++;
 		$data['callback'] = array($this, __FUNCTION__);
@@ -107,7 +107,6 @@ class Filter {
 		$cbIndex = $data['cbIndex'];
 		if ( !isset($this->_arrPostRouter[$cbIndex]) ) {
 			return $this->preDispatch($dispatcher);
-			//return AHA_DECLINED;
 		}
 		$data['cbIndex']++;
 		$data['callback'] = array($this, __FUNCTION__);
@@ -128,7 +127,6 @@ class Filter {
 		$cbIndex = $data['cbIndex'];
 		if ( !isset($this->_arrPreDispatch[$cbIndex]) ) {
 			return $dispatcher->dispatchLoop();
-			//return AHA_DECLINED;
 		}
 		$data['cbIndex']++;
 		$data['callback'] = array($this, __FUNCTION__);

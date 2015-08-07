@@ -42,7 +42,7 @@ class Config {
 	protected function _initConfig() {
 		$appNamespace	= $this->_objBootstrap->getAppNamespace();
 		$appPath		= $this->_objBootstrap->getLoader()->getPathByByNamespace($appNamespace);
-		$configPath		= $appPath . DIRECTORY_SEPARATOR . 'Config';
+		$configPath		= $appPath . DIRECTORY_SEPARATOR . $appNamespace . DIRECTORY_SEPARATOR . 'Config';
 		if ( !is_dir($configPath) ) {
 			return;
 		}
@@ -50,7 +50,7 @@ class Config {
 		$this->_loadConfig($configPath);
 		
 		$environ			= $this->_objBootstrap->getEnviron();
-		$environConfigPath	= $configPath . DIRECTORY_SEPARATOR . $environ;
+		$environConfigPath	= $configPath . DIRECTORY_SEPARATOR . ucfirst($environ);
 		if ( !is_dir($environConfigPath) ) {
 			return;
 		}

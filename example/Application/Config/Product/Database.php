@@ -14,25 +14,10 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace Application\Actions\App;
-use \Aha\Mvc\Action;
-
-class Say extends Action {
-	
-	public function excute() {
-		$request	= $this->_objDispatcher->getRequest();
-		$response	= $this->_objDispatcher->getResponse();
-		$response->end("Welcome to the world of Aha!");
-		/*
-		$config		= $this->_objDispatcher->getBootstrap()->getConfig();
-		$data = array(
-			'get' => $config->get('database','key'),
-			'obj' => $config->database->key,
-			'all' => $config->get('database'),
-		);
-		$response->write(json_encode($data));
-		$response->end();
-		 */
-	}
-	
-} 
+return array(
+	'key'	=> array(
+		'key'	=> 'product',
+		'sub'	=> 'pro'
+	),
+	'host'	=>	'xx.xx.xx.xx'
+);

@@ -49,6 +49,18 @@ class Sample extends Http {
 		$this->_objAha = \Aha\Bootstrap::getInstance(APP_NAME, 'product');
 		$this->_objAha->getLoader()->registerNamespace(APP_NAME, APPLICATION_PATH);
 		$this->_objAha->run();
+		/**
+		$filter = new \Application\Filters\Track();
+		$this->_objAha->getFilter()
+				->registerPreRouter(array($filter, 'preRouterOne'))
+				->registerPreRouter(array($filter, 'preRouterTwo'))
+				->registerPostRouter(array($filter, 'postRouterOne'))
+				->registerPostRouter(array($filter, 'postRouterTwo'))
+				->registerPreDispatch(array($filter, 'preDispatchOne'))
+				->registerPreDispatch(array($filter, 'preDispatchTwo'))
+				->registerPostDispatch(array($filter, 'postDispatchOne'))
+				->registerPostDispatch(array($filter, 'postDispatchTwo'));
+		 */
 	}
 	
 	/**
