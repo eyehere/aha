@@ -48,6 +48,7 @@ class HttpServer extends Http {
 		define('APP_NAME','Application');
 		define('APPLICATION_PATH', dirname(dirname(__DIR__)));
 		$this->_objAha = \Aha\Bootstrap::getInstance(APP_NAME, 'product');
+		$this->_objAha->setServer($server);
 		$this->_objAha->getLoader()->registerNamespace(APP_NAME, APPLICATION_PATH);
 		$this->_objAha->run();
 		/**

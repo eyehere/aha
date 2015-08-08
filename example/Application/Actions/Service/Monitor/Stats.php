@@ -25,6 +25,7 @@ class Stats extends Action {
 			'version'	=> swoole_version(),
 			'stats'		=> $this->_objDispatcher->getBootstrap()->getServer()->stats(),
 		);
+		$response	= $this->_objDispatcher->getResponse();
 		$response->end( json_encode($arrData) );
 	}
 	
