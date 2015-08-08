@@ -29,6 +29,9 @@ class UdpServer extends Udp {
 
 	public function __construct() {
 		$server = new \swoole_server('0.0.0.0', 9603, SWOOLE_PROCESS, SWOOLE_SOCK_UDP);
+		
+		$this->setVarDirectory(dirname(__DIR__) .'/Var/');
+		
 		$arrSetting = array('log_file' => dirname(__DIR__) .'/Logs/Aha.log');
 		parent::__construct($server, 'UdpServer', $arrSetting);
 		$server->start();

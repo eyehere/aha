@@ -29,6 +29,9 @@ class TcpServer extends Tcp {
 
 	public function __construct() {
 		$server = new \swoole_server('0.0.0.0', 9602, SWOOLE_PROCESS, SWOOLE_SOCK_TCP);
+		
+		$this->setVarDirectory(dirname(__DIR__) .'/Var/');
+		
 		$arrSetting = array('log_file' => dirname(__DIR__) .'/Logs/Aha.log');
 		parent::__construct($server, 'TcpServer', $arrSetting);
 		$server->start();

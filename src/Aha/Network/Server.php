@@ -28,6 +28,9 @@ abstract class Server {
 	
 	//项目名称
 	protected $_appName	= 'Aha';
+	
+	//Var目录
+	protected $_varDirectory = null;
 
 	//================Server start BEGIN==============================================
 	/**
@@ -48,7 +51,17 @@ abstract class Server {
 		return $this;
 	}
 	
-	//初始化事件回调
+	/**
+	 * @brief 设置var目录
+	 * @param \string $directory
+	 * @return \Aha\Network\Server
+	 */
+	public function setVarDirectory(\string $directory) {
+		$this->_varDirectory = $directory;
+		return $this;
+	}
+
+		//初始化事件回调
 	protected function _initEvents() {
 		//主线程
 		$this->_objServer->on('start', array($this,'onStart') );
@@ -156,10 +169,21 @@ abstract class Server {
 	 * 想用$server->reload()重载代码，必须在onWorkerStart中require业务文件
 	 */
 	public function onWorkerStart(\swoole_server $server, \int $workerId) {
-		if ( $workerId > $this->_objServer->setting['worker_num'] ) {
-			swoole_set_process_name($this->_appName .'-Task-'.$workerId);
+		if (function_exists('apc_clear_cache') ) {
+			apc_clear_cache();
+		}
+		if (function_exists('opcache_reset') ) {
+			opcache_reset();
+		}
+		
+		if ( !function_exists('cli_set_process_title') ) {
+			return;
+		}
+		
+		if ( $workerId >= $this->_objServer->setting['worker_num'] ) {
+			cli_set_process_title($this->_appName .'-Task-'.$workerId);
 		} else {
-			swoole_set_process_name($this->_appName .'-Worker-'.$workerId);
+			cli_set_process_title($this->_appName .'-Worker-'.$workerId);
 		}
 	}
 	
@@ -205,7 +229,9 @@ abstract class Server {
 	 * 建议操作：echo 写日志 修改进程名称 记录master和manager的进程ID
 	 */
 	public function onStart(\swoole_server $server) {
-		swoole_set_process_name($this->_appName .'-Master');
+		if ( function_exists('cli_set_process_title') ) {
+			cli_set_process_title($this->_appName .'-Master');
+		}
 	}
 	
 	/**
@@ -238,7 +264,15 @@ abstract class Server {
 	 * 在这个时刻可以修改进程的名称
 	 */
 	public function onManagerStart(\swoole_server $server) {
-		swoole_set_process_name( $this->_appName . '-Manager');
+		$masterPid  = $this->_varDirectory . 'Master.pid';
+		$managerPid = $this->_varDirectory . 'Manager.pid';
+		
+		file_put_contents($masterPid, $server->master_pid);
+		file_put_contents($managerPid, $server->manager_pid);
+		
+		if ( function_exists('cli_set_process_title') ) {
+			cli_set_process_title( $this->_appName . '-Manager');
+		}
 	}
 	
 	/**

@@ -1,13 +1,13 @@
 #! /bin/sh
 
-php_BIN=/home/luweijun/opt/soft/php/bin/php 
+php_BIN=/Users/luweijun/opt/soft/php/bin/php
 server_BIN=../Server/HttpServer.php
-master_PID=../Var/httpServer-Master.pid
-manager_PID=../Var/httpServer-Manager.pid
+master_PID=../Var/Master.pid
+manager_PID=../Var/Manager.pid
 
 case "$1" in
 	start)
-		echo -n "Starting ... "
+		echo "Starting ... "
 
 		$php_BIN $server_BIN
 
@@ -16,33 +16,21 @@ case "$1" in
 			exit 1
 		fi
 		
-                echo " done"
+        echo " done"
 	;;
 
 	stop)
-		echo -n "Gracefully shutting down ... "
+		echo "Gracefully shutting down ... "
 
 		if [ ! -r $master_PID ] ; then
 			echo "warning, no pid file found - master is not running ?"
 			exit 1
 		fi
 
-		kill -QUIT `cat $master_PID`
-			
-                echo " done"
-	;;
-
-	quit)
-		echo -n "Terminating ... "
-
-		if [ ! -r $server_PID ] ; then
-			echo "warning, no pid file found - master is not running ?"
-			exit 1
-		fi
-
 		kill -TERM `cat $master_PID`
-
-		echo " done"
+		kill -KILL `cat $master_PID`
+			
+        echo " done"
 	;;
 
 	restart)
@@ -52,7 +40,7 @@ case "$1" in
 
 	reload)
 
-		echo -n "Reload service ... "
+		echo "Reload service ... "
 
 		if [ ! -r $manager_PID ] ; then
 			echo "warning, no pid file found - manager is not running ?"
@@ -65,7 +53,7 @@ case "$1" in
 	;;
 
 	*)
-		echo "Usage: $0 {start|stop|quit|restart|reload}"
+		echo "Usage: $0 {start|stop|restart|reload}"
 		exit 1
 	;;
 

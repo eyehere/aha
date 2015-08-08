@@ -30,6 +30,9 @@ class HttpServer extends Http {
 
 	public function __construct() {
 		$server = new \swoole_http_server('0.0.0.0', 9601);
+		
+		$this->setVarDirectory(dirname(__DIR__) .'/Var/');
+		
 		$arrSetting = array('log_file' => dirname(__DIR__) .'/Logs/Aha.log');
 		parent::__construct($server, 'HttpServer', $arrSetting);
 		$server->start();
