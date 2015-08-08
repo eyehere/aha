@@ -33,6 +33,9 @@ class Bootstrap {
 	//filter instance
 	private $_objFilter = null;
 	
+	//server
+	private $_objServer = null;
+	
 	//application instance
 	private static $_instance = null;
 	
@@ -155,6 +158,24 @@ class Bootstrap {
 	 */
 	public function getAppNamespace() {
 		return $this->_appNamespace;
+	}
+	
+	/**
+	 * @brief 设置server
+	 * @param \swoole_server $server
+	 * @return \Aha\Bootstrap
+	 */
+	public function setServer(\swoole_server $server) {
+		$this->_objServer = $server;
+		return $this;
+	}
+	
+	/**
+	 * @brief 获取server
+	 * @return type
+	 */
+	public function getServer() {
+		return $this->_objServer;
 	}
 
 	/**
