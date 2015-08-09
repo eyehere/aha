@@ -49,7 +49,7 @@ class Http extends Server {
 	 * $request $response传递给其它函数时，不要加&引用符号
 	 */
 	public function onRequest(\swoole_http_request $request, \swoole_http_response $response) {
-		
+		$response->header('Server', 'Aha-Http-Server');
 	}
 	
 	/**
