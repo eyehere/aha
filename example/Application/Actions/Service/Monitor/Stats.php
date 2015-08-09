@@ -23,6 +23,7 @@ class Stats extends Action {
 		$arrData = array(
 			'local_ip'	=> swoole_get_local_ip(),
 			'version'	=> swoole_version(),
+			'setting'	=> $this->_objDispatcher->getBootstrap()->getServer()->setting,
 			'stats'		=> $this->_objDispatcher->getBootstrap()->getServer()->stats(),
 		);
 		$response	= $this->_objDispatcher->getResponse();

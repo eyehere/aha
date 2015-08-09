@@ -176,6 +176,8 @@ abstract class Server {
 			opcache_reset();
 		}
 		
+		//register_shutdown_function( array($this,'handleFatal') );
+		
 		if ( !function_exists('cli_set_process_title') ) {
 			return;
 		}
@@ -202,7 +204,11 @@ abstract class Server {
 	 * @brief 在worker进程终止的时候发生，可以回收worker进程申请的各类资源
 	 */
 	public function onWorkerStop(\swoole_server $server, \int $workerId) {
-		
+		if ( $workerId >= $this->_objServer->setting['worker_num'] ) {
+			echo '[' . date('Y-m-d H:i:s') . "] Task worker [$workerId] stoped!" . PHP_EOL;
+		} else {
+			echo '[' . date('Y-m-d H:i:s') . "] Event worker [$workerId] stoped!" . PHP_EOL;
+		}
 	}
 	
 	/**
@@ -229,6 +235,12 @@ abstract class Server {
 	 * 建议操作：echo 写日志 修改进程名称 记录master和manager的进程ID
 	 */
 	public function onStart(\swoole_server $server) {
+		$masterPid  = $this->_varDirectory . 'Master.pid';
+		$managerPid = $this->_varDirectory . 'Manager.pid';
+		
+		file_put_contents($masterPid, $server->master_pid);
+		file_put_contents($managerPid, $server->manager_pid);
+		
 		if ( function_exists('cli_set_process_title') ) {
 			cli_set_process_title($this->_appName .'-Master');
 		}
@@ -240,7 +252,7 @@ abstract class Server {
 	 * 注意：kill -15发送SIGTREM信号到主进程才能按正常流程终止
 	 */
 	public function onShutdown(\swoole_server $server) {
-		
+			
 	}
 	
 	/**
@@ -256,7 +268,7 @@ abstract class Server {
 	 * 主要用于监控和报警 很有可能遇到了致命错误或者coredump
 	 */
 	public function onWorkerError(\swoole_server $server, \int $workerId, \int $workerPid, \int $exitCode) {
-		
+		echo "[onWorkerError_CALLBACK] [workerId]$workerId [workerPid]$workerPid [exitCode]$exitCode" . PHP_EOL;
 	}
 	
 	/**
@@ -264,12 +276,6 @@ abstract class Server {
 	 * 在这个时刻可以修改进程的名称
 	 */
 	public function onManagerStart(\swoole_server $server) {
-		$masterPid  = $this->_varDirectory . 'Master.pid';
-		$managerPid = $this->_varDirectory . 'Manager.pid';
-		
-		file_put_contents($masterPid, $server->master_pid);
-		file_put_contents($managerPid, $server->manager_pid);
-		
 		if ( function_exists('cli_set_process_title') ) {
 			cli_set_process_title( $this->_appName . '-Manager');
 		}
@@ -283,5 +289,44 @@ abstract class Server {
 	}
 	
 	//================回调函数  END==============================================
+	
+	//================FATAL ERROR handler======================================
+	public function handleFatal() {
+		$error = error_get_last();
+		if (isset($error['type'])) {
+			switch ($error['type']) {
+				case E_ERROR :
+				case E_PARSE :
+				case E_DEPRECATED:
+				case E_CORE_ERROR :
+				case E_COMPILE_ERROR :
+					$message = $error['message'];
+					$file = $error['file'];
+					$line = $error['line'];
+					$log = "[FATAL] ($file:$line) $message\nStack trace:\n";
+					$trace = debug_backtrace();
+					foreach ($trace as $i => $t) {
+						if (!isset($t['file'])) {
+							$t['file'] = 'unknown';
+						}
+						if (!isset($t['line'])) {
+							$t['line'] = 0;
+						}
+						if (!isset($t['function'])) {
+							$t['function'] = 'unknown';
+						}
+						$log .= "#$i {$t['file']}({$t['line']}): ";
+						if (isset($t['object']) && is_object($t['object'])){
+							$log .= get_class($t['object']) . '->';
+						}
+						$log .= "{$t['function']}()\n";
+					}
+					if (isset($_SERVER['REQUEST_URI'])) {
+						$log .= '[QUERY] ' . $_SERVER['REQUEST_URI'];
+					}
+					echo $log . PHP_EOL;
+			}
+		}
+	}
 	
 }
