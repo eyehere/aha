@@ -16,6 +16,7 @@
 */
 namespace Application\Actions\App;
 use \Aha\Mvc\Action;
+use \Application\Util\Log;
 
 class Say extends Action {
 	
@@ -33,6 +34,14 @@ class Say extends Action {
 		$response->write(json_encode($data));
 		$response->end();
 		 */
+		/*
+		$levels = array('debug','info','notice','warning','error','critical','alert','emergency');
+		Log::publicLog()->pub(array('from'=>'pub'));
+		foreach($levels as $level) {
+			Log::appLog()->$level(array('from'=>$level));
+			Log::monitor()->$level(array('from'=>$level));
+		}
+		*/
 	}
 	
 } 
