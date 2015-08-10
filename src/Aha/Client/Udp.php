@@ -15,11 +15,11 @@
   +----------------------------------------------------------------------+
 */
 namespace Aha\Client;
-use Aha\Network\Client;
+use \Aha\Network\Client;
 
-class Http extends Client {
+class Udp extends Client {
 	
-	public function __construct(\swoole_client $client) {
+	public function __construct(\string $host, \string $port) {
 		parent::__construct($client);
 	}
 	

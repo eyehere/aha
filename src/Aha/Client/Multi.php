@@ -14,21 +14,41 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace Aha\Client;
-use Aha\Network\Client;
+namespace Aha\Multi;
 
-class Http extends Client {
+class Multi {
 	
-	public function __construct(\swoole_client $client) {
-		parent::__construct($client);
+	/**
+	 * @brief 注册client
+	 * @var type 
+	 */
+	protected $_arrClients = array();
+
+	/**
+	 * @ after loop callback
+	 * @var type 
+	 */
+	protected $_callback = null;
+	
+	/**
+	 * @brief 注册并行的client
+	 * @param \Aha\Network\Client $client
+	 * @return \Aha\Multi\Multi
+	 */
+	public function register(\Aha\Network\Client $client) {
+		array_push($this->_arrClients, $client);
+		return $this;
 	}
 	
-	public function setOpt() {
+	/**
+	 * @brief 并行执行注册的请求
+	 * @param \callbale $callback
+	 * @return \Aha\Multi\Multi
+	 */
+	public function loop(\callbale $callback) {
+		$this->_callback = $callback;
 		
-	}
-	
-	public function loop() {
-		
+		return $this;
 	}
 	
 }

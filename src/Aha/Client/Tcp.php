@@ -15,9 +15,9 @@
   +----------------------------------------------------------------------+
 */
 namespace Aha\Client;
-use Aha\Network\Client;
+use \Aha\Network\Client;
 
-class Http extends Client {
+class Tcp extends Client {
 	
 	public function __construct(\swoole_client $client) {
 		parent::__construct($client);
