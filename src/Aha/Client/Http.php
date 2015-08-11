@@ -15,20 +15,45 @@
   +----------------------------------------------------------------------+
 */
 namespace Aha\Client;
-use Aha\Network\Client;
+use \Aha\Network\Client;
 
 class Http extends Client {
 	
-	public function __construct(\swoole_client $client) {
-		parent::__construct($client);
+	/**
+	 * @brief 初始化一个http客户端
+	 * @param \string $host
+	 * @param \int $port
+	 * @param type $timeout
+	 * @param type $connectTimeout
+	 */
+	public function __construct(\string $host, \int $port, $timeout = 1, $connectTimeout = 0.05) {
+		$client = new \swoole_client(SWOOLE_SOCK_TCP , SWOOLE_SOCK_ASYNC);
+		parent::__construct($client, $host, $port, $timeout, $connectTimeout);
+	}
+
+	/**
+	 * @brief 接收响应数据的callback
+	 * @param \swoole_client $client
+	 * @param type $data
+	 */
+	public function onReceive(\swoole_client $client, $data) {
+		$client->close();
+		$response = array(
+			'errno'		=> \Aha\Network\Client::ERR_SUCESS, 
+			'errmsg'	=> 'sucess',
+			'requestId'	=> $this->_requestId,
+			'const'		=> microtime(true) - $this->_const,
+			'data'		=> $data
+		);
+		call_user_func($this->_callback, $response);
 	}
 	
-	public function setOpt() {
-		
-	}
-	
+	/**
+	 * @brief 对外请求开始loop
+	 */
 	public function loop() {
-		
+		parent::loop();
+		$this->_objClient->connect($this->_host, $this->_port, $this->_connectTimeout);
 	}
-	
+
 }
