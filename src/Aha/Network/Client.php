@@ -94,7 +94,7 @@ abstract class Client {
 	 * @param \swoole_client $client
 	 */
 	public function onConnect(\swoole_client $client) {
-		if ( ! $client->send($this->_request) ) {
+		if ( ! $client->send($this->_package) ) {
 			$client->close();
 			$response = array(
 				'errno'		=> \Aha\Network\Client::ERR_SEND_FAILED, 
