@@ -152,7 +152,7 @@ class Router {
 		$directoryIt->rewind();
 		while ($directoryIt->valid()) {
 			if ( !$directoryIt->isDot() && substr($directoryIt->key(), -4) === AHA_EXT ) {
-				array_push(self::$_arrActions, rtrim($directoryIt->key(), AHA_EXT));
+				array_push(self::$_arrActions, substr($directoryIt->key(), 0, -strlen(AHA_EXT)));
 			}
 			$directoryIt->next();
 		}

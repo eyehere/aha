@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace Aha\Multi;
+namespace Aha\Client;
 
 class Multi {
 	
@@ -79,7 +79,7 @@ class Multi {
 	 * @param \callbale $callback
 	 * @return \Aha\Multi\Multi
 	 */
-	public function loop(\callbale $callback) {
+	public function loop($callback) {
 		$this->_const = microtime(true);
 		$this->_callback = $callback;
 		foreach ( $this->_arrClients as $client ) {

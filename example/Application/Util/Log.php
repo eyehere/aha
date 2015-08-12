@@ -21,17 +21,17 @@ use Aha\Log\Logger;
 class Log {
 	
 	//log路径
-	const LOG_PATH = '/Users/luweijun/opt/base/aha/aha/example/Application/Logs/';
+	const LOG_PATH = '/Logs/';
 	
 	//public日志路径
-	const PUBLIC_LOG_PATH = '/Users/luweijun/opt/base/aha/aha/example/Application/Logs/';
+	const PUBLIC_LOG_PATH = '/Logs/';
 	
 	/**
 	 * @brief public log
 	 * @return obj
 	 */
 	public static function publicLog() {
-		$logFile = self::PUBLIC_LOG_PATH . 'public.log';
+		$logFile = dirname(__DIR__) . self::PUBLIC_LOG_PATH . 'public.log';
 		$objLogger = Logger::pubLog($logFile);
 		$objLogger->setAppName('appname');
 		return $objLogger;
@@ -42,7 +42,7 @@ class Log {
 	 * @return obj
 	 */
 	public static function appLog() {
-		$logFile = self::LOG_PATH .'app-' . date('Ymd') . '.log';
+		$logFile = dirname(__DIR__) . self::LOG_PATH .'app-' . date('Ymd') . '.log';
 		$objLogger = Logger::appLog($logFile, Logger::DEBUG, 
 						Logger::WEB_TRACE_ON, Logger::BACK_TRACE_ON);
 		return $objLogger;
@@ -53,7 +53,7 @@ class Log {
 	 * @return type
 	 */
 	public static function monitor() {
-		$logFile = self::LOG_PATH . 'monitor.log';
+		$logFile = dirname(__DIR__) .  self::LOG_PATH . 'monitor.log';
 		$objLogger = Logger::monitorLog($logFile,  Logger::ERROR, 
 						Logger::WEB_TRACE_ON, Logger::BACK_TRACE_ON);
 		return $objLogger;

@@ -142,7 +142,7 @@ class Http extends Client {
 		$headerParts   = explode("\r\n", $responseParts[0]);
 		list($this->_responseHeader['protocol'], 
 			 $this->_responseHeader['status'], 
-			 $this->_responseHeader['desc'] ) = explode($headerParts[0], ' ', 3);
+			 $this->_responseHeader['desc'] ) = explode(' ', $headerParts[0], 3);
 		unset($headerParts[0]);
 		
 		foreach ( $headerParts as $headerPart ) {
@@ -151,6 +151,7 @@ class Http extends Client {
 			list($key, $val) = explode(':', $headerPart, 2);
 			$this->_responseHeader[strtolower(trim($key))] = trim($val);
 		}
+		
 		$this->_buffer = $responseParts[1];
 		return AHA_DECLINED;
 	}
@@ -160,8 +161,8 @@ class Http extends Client {
 	 * @return string
 	 */
 	protected function _unPackResponseBody() {
-		if ( isset($this->_responseHeader['Content-Length']) && 
-			 $this->_responseHeader['Content-Length'] <= strlen($this->_buffer) ) {
+		if ( isset($this->_responseHeader['content-length']) && 
+			 $this->_responseHeader['content-length'] <= strlen($this->_buffer) ) {
 			$this->_responseBody = $this->_buffer;
 			return AHA_DECLINED;
 		}
@@ -198,7 +199,6 @@ class Http extends Client {
 				$this->_responseBody .= substr($this->_buffer, 0, $this->_trunkLength);
 				$this->_buffer		= substr($this->_buffer, $this->_trunkLength + 2);
 				$this->_trunkLength	= 0;
-				return AHA_AGAIN;
 			}
 		}
 		return AHA_AGAIN;
@@ -235,13 +235,15 @@ class Http extends Client {
 			'requestId'	=> $this->_requestId,
 			'const'		=> microtime(true) - $this->_const,
 			'data'		=> array(
-				'hrader'	=> $this->_responseHeader,
+				'header'	=> $this->_responseHeader,
 				'body'		=> $this->_responseBody
 			)
 		);
 		call_user_func($this->_callback, $response);
 		$client->close();
-		swoole_timer_clear($this->_timer);
+		if ( null !== $this->_timer ) {
+			swoole_timer_clear($this->_timer);
+		}
 	}
 
 	/**
@@ -250,7 +252,7 @@ class Http extends Client {
 	 * @param type $data
 	 */
 	public function onReceive(\swoole_client $client, $data) {
-		call_user_func(array($this->_unPackResponse), $client, $data);
+		call_user_func(array($this, '_unPackResponse'), $client, $data);
 	}
 	
 	/**
