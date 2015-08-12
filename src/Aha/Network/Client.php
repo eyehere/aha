@@ -149,6 +149,14 @@ abstract class Client {
 	}
 	
 	/**
+	 * @brief 返回requestId
+	 * @return type
+	 */
+	public function getRequestId() {
+		return $this->_requestId;
+	}
+
+	/**
 	 * @set request 包括请求行 + 请求头 + 请求体
 	 * @param type $package
 	 * @return \Aha\Network\Client

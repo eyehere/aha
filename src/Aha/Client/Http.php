@@ -21,19 +21,25 @@ class Http extends Client {
 	
 	protected $_method	= 'GET';//HTTP METHOD
 	protected $_url		= null;//url
-	protected $_query	= array();//Query String
-	protected $_body	= array();//Post Body
 	
-	protected $_requestHeaders = array();
+	protected $_requestHeaders	= array();//请求头
+	protected $_query			= array();//Query String 请求get参数
+	protected $_requestBody		= array();//Post Body 请求体
 
 	protected $_host	= null;//host
 	protected $_port	= 80;//port
 	protected $_path	= '/';
 
+	protected $_responseHeader	= array();//响应头
+	protected $_responseBody	= null;//响应body
+	
+	protected $_buffer		= '';//响应buffer
+	protected $_trunkLength	= 0;//transfer-encoding:chunked时
+
 	/**
 	 * @brief 初始化一个http客户端
-	 * @param \string $host
-	 * @param \int $port
+	 * @param \string $method
+	 * @param \string $url
 	 * @param type $timeout
 	 * @param type $connectTimeout
 	 */
@@ -44,9 +50,9 @@ class Http extends Client {
 		$this->_method	= $method;
 		$this->_url		= $url;
 		
-		$arrUrl = parse_url($url);
+		$arrUrl			= parse_url($url);
 		$this->_host	= $arrUrl['host'];
-		$this->_port = isset($arrUrl['port']) ? $arrUrl['port'] : 80;
+		$this->_port	= isset($arrUrl['port']) ? $arrUrl['port'] : 80;
 		if ( $arrUrl['scheme'] === 'https' ) {
 			$this->_port = 443;
 		}
@@ -57,17 +63,20 @@ class Http extends Client {
 		$this->_init();
 	}
 	
+	/**
+	 * @brief 初始化请求头
+	 */
 	protected function _init() {
 		$this->_requestHeaders = array(
-			'Host'			=> $this->_host,
-			'User-Agent'	=> 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36',
-			'Accept'		=> 'text/xml,application/xml,application/xhtml+xml,text/html,text/plain,image/png,image/jpeg,image/gif,*/*',
-			'Accept-language'=> 'zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4,ja;q=0.2',
-			'Accept-encoding'=> 'gzip,deflate,sdch'
+			'Host'				=> $this->_host,
+			'User-Agent'		=> 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36',
+			'Accept'			=> 'text/xml,application/xml,application/xhtml+xml,text/html,text/plain,image/png,image/jpeg,image/gif,*/*',
+			'Accept-Language'	=> 'zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4,ja;q=0.2',
+			'Accept-Encoding'	=> 'gzip,deflate,sdch'
 		);
 		
 		if ( $this->_method === 'POST' ) {
-			$this->_requestHeaders['Content_Type'] = 'application/x-www-form-urlencoded';
+			$this->_requestHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
 		}
 	}
 
@@ -86,8 +95,8 @@ class Http extends Client {
 	 * @param array $body
 	 * @return \Aha\Client\Http
 	 */
-	public function setBody( array $body ) {
-		$this->_body = $body;
+	public function setRequestBody( array $body ) {
+		$this->_requestBody = $body;
 		return $this;
 	}
 	
@@ -104,14 +113,135 @@ class Http extends Client {
 		return $this;
 	}
 	
-	
+	/**
+	 * @brief build http request pachage
+	 */
 	protected function _buildRequest() {
 		if ( !empty($this->_query) ) {
 			$this->_path .= '?' . http_build_query($this->_query);
 		}
+		$body = '';
+		if ( $this->_method === 'POST' && !empty($this->_requestBody) ) {
+			$body = http_build_query($this->_requestBody);
+			$this->_requestHeaders['Content-Length'] = strlen($body);
+		}
 		$header = "{$this->_method} {$this->_path} HTTP/1.1";
+		foreach ( $this->_requestHeaders as $key=>$val ) {
+			$header .= "\r\n{$key}:{$val}";
+		}
 		
+		$this->setPackage( $header . "\r\n\r\n" . $body);
+	}
+	
+	/**
+	 * @brief 解析http响应头
+	 * @return string
+	 */
+	protected function _unPackResponseHeader() {
+		$responseParts = explode("\r\n\r\n", $this->_buffer, 2);
+		$headerParts   = explode("\r\n", $responseParts[0]);
+		list($this->_responseHeader['protocol'], 
+			 $this->_responseHeader['status'], 
+			 $this->_responseHeader['desc'] ) = explode($headerParts[0], ' ', 3);
+		unset($headerParts[0]);
 		
+		foreach ( $headerParts as $headerPart ) {
+			$headerPart = trim($headerPart);
+			if ( empty($headerPart) ) continue;
+			list($key, $val) = explode(':', $headerPart, 2);
+			$this->_responseHeader[strtolower(trim($key))] = trim($val);
+		}
+		$this->_buffer = $responseParts[1];
+		return AHA_DECLINED;
+	}
+	
+	/**
+	 * @brief 解析http response body
+	 * @return string
+	 */
+	protected function _unPackResponseBody() {
+		if ( isset($this->_responseHeader['Content-Length']) && 
+			 $this->_responseHeader['Content-Length'] <= strlen($this->_buffer) ) {
+			$this->_responseBody = $this->_buffer;
+			return AHA_DECLINED;
+		}
+		
+		if ( isset($this->_responseHeader['transfer-encoding']) &&
+			 $this->_responseHeader['transfer-encoding'] === 'chunked' ) {
+			return $this->_unPackChunkBody();
+		}
+		
+		return AHA_AGAIN;
+	}
+	
+	/**
+	 * @brief 解析http response truncked body
+	 * @return string
+	 */
+	protected function _unPackChunkBody() {
+		while (true) {
+			if ( $this->_trunkLength === 0 ) {
+				$lenPart = strstr($this->_buffer, "\r\n", true);
+				if ( false === $lenPart ) {
+					return AHA_AGAIN;
+				}
+				$trunkLength = hexdec($lenPart);
+				if ( $trunkLength === 0 ) {
+					return AHA_DECLINED;
+				}
+				$this->_trunkLength = $trunkLength;
+				$this->_buffer = substr($this->_buffer, strlen($lenPart) + 2 );
+			} else {
+				if (strlen($this->_buffer) < $this->_trunkLength ) {
+					return AHA_AGAIN;
+				}
+				$this->_responseBody .= substr($this->_buffer, 0, $this->_trunkLength);
+				$this->_buffer		= substr($this->_buffer, $this->_trunkLength + 2);
+				$this->_trunkLength	= 0;
+				return AHA_AGAIN;
+			}
+		}
+		return AHA_AGAIN;
+	}
+
+	/**
+	 * @brief 解析http response
+	 * @param \swoole_client $client
+	 * @param type $data
+	 * @return string
+	 */
+	protected function _unPackResponse(\swoole_client $client, $data) {
+		$this->_buffer .= $data;
+		if ( empty($this->_responseHeader) && strrpos($this->_buffer, "\r\n\r\n") ) {
+			$this->_unPackResponseHeader();
+		}
+		
+		if ( empty($this->_responseHeader) ) {
+			return AHA_AGAIN;
+		}
+		
+		if ( AHA_AGAIN === $this->_unPackResponseBody() ) {
+			return AHA_AGAIN;
+		}
+		
+		if ( isset($this->_responseHeader['content-encoding']) ) {
+			$this->_responseBody = \Aha\Client\Http::gzDecode($this->_responseBody, 
+										$this->_responseHeader['content-encoding']);
+		}
+		
+		$response = array(
+			'errno'		=> \Aha\Network\Client::ERR_SUCESS, 
+			'errmsg'	=> 'sucess',
+			'requestId'	=> $this->_requestId,
+			'const'		=> microtime(true) - $this->_const,
+			'data'		=> array(
+				'hrader'	=> $this->_responseHeader,
+				'body'		=> $this->_responseBody
+			)
+		);
+		call_user_func($this->_callback, $response);
+		$client->close();
+		swoole_timer_clear($this->_timer);
 	}
 
 	/**
@@ -120,15 +250,7 @@ class Http extends Client {
 	 * @param type $data
 	 */
 	public function onReceive(\swoole_client $client, $data) {
-		$client->close();
-		$response = array(
-			'errno'		=> \Aha\Network\Client::ERR_SUCESS, 
-			'errmsg'	=> 'sucess',
-			'requestId'	=> $this->_requestId,
-			'const'		=> microtime(true) - $this->_const,
-			'data'		=> $data
-		);
-		call_user_func($this->_callback, $response);
+		call_user_func(array($this->_unPackResponse), $client, $data);
 	}
 	
 	/**
@@ -139,5 +261,23 @@ class Http extends Client {
 		parent::loop();
 		$this->_objClient->connect($this->_host, $this->_port, $this->_connectTimeout);
 	}
+	
+	/**
+	 * @brief 解压响应数据包
+	 * @param type $data
+	 * @param \string $type
+	 * @return type
+	 */
+	public static function gzDecode($data, \string $type = 'gzip') {
+        if ($type == 'gzip') {
+            return gzdecode($data);
+        } elseif ($type == 'deflate') {
+            return gzinflate($data);
+        } elseif ($type == 'compress') {
+            return gzinflate(substr($data, 2, -4));
+        } else {
+            return $data;
+        }
+    }
 
 }
