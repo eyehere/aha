@@ -61,6 +61,7 @@ class Http extends Client {
 		$client = new \swoole_client(SWOOLE_SOCK_TCP , SWOOLE_SOCK_ASYNC);
 		parent::__construct($client, $this->_host, $this->_port, $timeout, $connectTimeout);
 		$this->_init();
+		$this->_initConfig();
 	}
 	
 	/**
@@ -78,6 +79,16 @@ class Http extends Client {
 		if ( $this->_method === 'POST' ) {
 			$this->_requestHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
 		}
+	}
+	
+	/**
+	 * 初始化config 保证收到一个完整的Udp包再回调
+	 */
+	protected function _initConfig() {
+		$setting = array(
+			'open_tcp_nodelay'		=>  true
+		);
+		$this->_objClient->set($setting);
 	}
 
 	/**
@@ -224,6 +235,11 @@ class Http extends Client {
 			return AHA_AGAIN;
 		}
 		
+		$client->close();
+		if ( null !== $this->_timer ) {
+			\Aha\Network\Timer::del($this->_timer);
+		}
+		
 		if ( isset($this->_responseHeader['content-encoding']) ) {
 			$this->_responseBody = \Aha\Client\Http::gzDecode($this->_responseBody, 
 										$this->_responseHeader['content-encoding']);
@@ -240,10 +256,6 @@ class Http extends Client {
 			)
 		);
 		call_user_func($this->_callback, $response);
-		$client->close();
-		if ( null !== $this->_timer ) {
-			swoole_timer_clear($this->_timer);
-		}
 	}
 
 	/**

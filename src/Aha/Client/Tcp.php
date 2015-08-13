@@ -53,7 +53,9 @@ class Tcp extends Client {
 	 */
 	public function onReceive(\swoole_client $client, $data) {
 		$client->close();
-		swoole_timer_clear($this->_timer);
+		if ( null !== $this->_timer ) {
+			\Aha\Network\Timer::del($this->_timer);
+		}
 		$response = array(
 			'errno'		=> \Aha\Network\Client::ERR_SUCESS, 
 			'errmsg'	=> 'sucess',

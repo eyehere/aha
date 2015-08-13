@@ -178,14 +178,14 @@ abstract class Server {
 		
 		//register_shutdown_function( array($this,'handleFatal') );
 		
-		if ( !function_exists('cli_set_process_title') ) {
-			return;
-		}
-		
 		if ( $workerId >= $this->_objServer->setting['worker_num'] ) {
 			cli_set_process_title($this->_appName .'-Task-'.$workerId);
 		} else {
 			cli_set_process_title($this->_appName .'-Worker-'.$workerId);
+			//swoole的网络IO没有读写超时控制，增加一个定时器处理网络读写超时控制
+			$server->tick(100, function(){
+				\Aha\Network\Timer::loop();
+			});
 		}
 	}
 	

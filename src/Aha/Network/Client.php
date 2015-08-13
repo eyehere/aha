@@ -68,6 +68,9 @@ abstract class Client {
 	 * @param \swoole_client $client
 	 */
 	public function __construct(\swoole_client $client, \string $host, \int $port, $timeout=1, $connectTimeout=0.05) {
+		if ( $timeout < 0.1 || $timeout > 10 ) {
+			throw new \Exception("The littlest timeout is 0.1 seconds and the longest is 10 second!now $timeout");
+		}
 		$this->_objClient		= $client;
 		$this->_host			= $host;
 		$this->_port			= $port;
@@ -184,17 +187,15 @@ abstract class Client {
 	public function loop() {
 		$this->_const = microtime(true);
 		if ( floatval($this->_timeout) > 0 ) {
-			/*$this->_timer = swoole_timer_after($this->_timeout * 1000, function(){
-				$this->_objClient->close();
-				$response = array(
-					'errno'		=> \Aha\Network\Client::ERR_REQUEST_TIMEOUT, 
-					'errmsg'	=> 'request_timeout',
-					'requestId'	=> $this->_requestId,
-					'const'		=> microtime(true) - $this->_const,
-					'data'		=> array()
-				);
-				call_user_func($this->_callback, $response);
-			});*/
+			$response = array(
+				'errno'		=> \Aha\Network\Client::ERR_REQUEST_TIMEOUT, 
+				'errmsg'	=> 'request_timeout',
+				'requestId'	=> $this->_requestId,
+				'const'		=> $this->_const,
+				'timeout'	=> $this->_timeout,
+				'data'		=> array()
+			);
+			$this->_timer = \Aha\Network\Timer::add($this->_callback, $response, $this->_objClient);
 		}
 		return $this;
 	}
