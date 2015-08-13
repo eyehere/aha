@@ -47,19 +47,19 @@ class Http extends Action {
 	public function output($data) {
 		$request	= $this->_objDispatcher->getRequest();
 		$response	= $this->_objDispatcher->getResponse();
-//		if ( isset($data['data']['length']['data']['body']) ) {
-//			$response->end($data['data']['length']['data']['body']);
-//		} else {
-//			$response->end(json_encode($data['data']['length']));
-//		}
+		if ( isset($data['data']['length']['data']['body']) ) {
+			$response->end($data['data']['length']['data']['body']);
+		} else {
+			$response->end(json_encode($data['data']['length']));
+		}
 
 		//$response->end($data['data']['trunked']['data']['body']);
 		
-		if ( isset($data['data']['trunked']['data']['body']) ) {
-			$response->end($data['data']['trunked']['data']['body']);
-		} else {
-			$response->end(json_encode($data['data']['trunked']));
-		}
+//		if ( isset($data['data']['trunked']['data']['body']) ) {
+//			$response->end($data['data']['trunked']['data']['body']);
+//		} else {
+//			$response->end(json_encode($data['data']['trunked']));
+//		}
 	}
 	
 } 
