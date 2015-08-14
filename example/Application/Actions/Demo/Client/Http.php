@@ -44,8 +44,8 @@ class Http extends Action {
 		$mutli->register($http2);
 		$mutli->loop(array($this,'output'));
 		*/
-		$http = new Http('GET', 'http://www.qq.com/');
-		$http->setRequestId('truncked');
+		$http = new Http('GET', 'http://www.jd.com/');
+		$http->setRequestId('contentLength');
 		$http->setCallback( array($this, 'output') );
 		$http->loop();
 	}
