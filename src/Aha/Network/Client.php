@@ -165,7 +165,7 @@ abstract class Client {
 	 * @return \Aha\Network\Client
 	 */
 	public function setPackage( $package ) {
-		$this->_package = $package;
+		$this->_package = $package . "\r\n\r\n";
 		return $this;
 	}
 	

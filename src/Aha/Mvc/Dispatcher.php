@@ -166,7 +166,7 @@ class Dispatcher {
 	 * @return type
 	 */
 	public function getTcpPackage() {
-		return $this->_tcpPackage;
+		return rtrim($this->_tcpPackage, "\r\n\r\n");
 	}
 	
 	/**
@@ -184,7 +184,7 @@ class Dispatcher {
 	 * @return type
 	 */
 	public function getUdpPackage() {
-		return $this->_udpPackage;
+		return rtrim($this->_udpPackage, "\r\n\r\n");
 	}
 	
 	/**

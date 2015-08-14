@@ -28,7 +28,7 @@ class Tcp extends Client {
 	 */
 	public function __construct(\string $host, \int $port, $timeout = 1, $connectTimeout = 0.05) {
 		//开启长连接默认用IP:PORT作为key
-		$client = new \swoole_client(SWOOLE_SOCK_TCP | SWOOLE_KEEP, SWOOLE_SOCK_ASYNC);
+		$client = new \swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
 		parent::__construct($client, $host, $port, $timeout, $connectTimeout);
 		$this->_initConfig();
 	}

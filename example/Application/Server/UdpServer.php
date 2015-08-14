@@ -73,7 +73,7 @@ class UdpServer extends Udp {
 	public function onPacket(\swoole_server $server, \string $data, $clientInfo) {
 		parent::onPacket($server, $data, $clientInfo);
 		try {
-			$arrRequest = json_decode($data);
+			$arrRequest = json_decode($data, true);
 			$cmd	= isset($arrRequest['cmd']) ? $arrRequest['cmd'] : '';
 			$router = new \Aha\Mvc\Router($this->_objAha, $cmd, '-');
 			$dispatcher = new \Aha\Mvc\Dispatcher($this->_objAha, 'udp');

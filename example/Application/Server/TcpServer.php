@@ -74,7 +74,7 @@ class TcpServer extends Tcp {
 	public function onReceive(\swoole_server $server, \int $fd, \int $fromId, \string $data) {
 		parent::onReceive($server, $fd, $fromId, $data);
 		try {
-			$arrRequest = json_decode($data);
+			$arrRequest = json_decode($data, true);
 			$cmd	= isset($arrRequest['cmd']) ? $arrRequest['cmd'] : '';
 			$router = new \Aha\Mvc\Router($this->_objAha, $cmd, '-');
 			$dispatcher = new \Aha\Mvc\Dispatcher($this->_objAha, 'tcp');
