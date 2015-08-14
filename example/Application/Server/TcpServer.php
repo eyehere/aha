@@ -81,7 +81,7 @@ class TcpServer extends Tcp {
 			$dispatcher->setTcpClientFd($fd)->setTcpFromId($fromId)->setTcpPackage($data);
 			$dispatcher->dispatch($router);
 		} catch  (\Exception $ex) {
-			$message = '[onRequest_callBack_excaption] [code]' . $ex->getCode() . ' [message]' .
+			$message = '[onReceive_callBack_excaption] [code]' . $ex->getCode() . ' [message]' .
 				$ex->getMessage() . '[file]' . $ex->getFile() . '[line]' . $ex->getLine() . PHP_EOL;
 			switch ( $ex->getCode() ) {
 				case AHA_ROUTER_EXCEPTION : 

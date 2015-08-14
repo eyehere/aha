@@ -34,6 +34,7 @@ class Http extends Action {
 		$http->setCallback( array($this, 'output') );
 		$http->loop();
 		 */
+		/*
 		$http1 = new Http('GET', 'http://www.qq.com/', 0.5);
 		$http1->setRequestId('trunked');
 		$http2 = new Http('GET', 'http://www.jd.com/', 0.5);
@@ -42,17 +43,29 @@ class Http extends Action {
 		$mutli->register($http1);
 		$mutli->register($http2);
 		$mutli->loop(array($this,'output'));
+		*/
+		$http = new Http('GET', 'http://www.qq.com/');
+		$http->setRequestId('truncked');
+		$http->setCallback( array($this, 'output') );
+		$http->loop();
 	}
 	
 	public function output($data) {
 		$request	= $this->_objDispatcher->getRequest();
 		$response	= $this->_objDispatcher->getResponse();
+		
+		if ( isset($data['data']['body']) ) {
+			$response->end($data['data']['body']);
+		} else {
+			$response->end(json_encode($data));
+		}
+		/*
 		if ( isset($data['data']['length']['data']['body']) ) {
 			$response->end($data['data']['length']['data']['body']);
 		} else {
 			$response->end(json_encode($data['data']['length']));
 		}
-
+		*/
 		//$response->end($data['data']['trunked']['data']['body']);
 		
 //		if ( isset($data['data']['trunked']['data']['body']) ) {

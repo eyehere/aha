@@ -80,7 +80,7 @@ class UdpServer extends Udp {
 			$dispatcher->setUdpPackage($data)->setUdpClientInfo($clientInfo);
 			$dispatcher->dispatch($router);
 		} catch  (\Exception $ex) {
-			$message = '[onRequest_callBack_excaption] [code]' . $ex->getCode() . ' [message]' .
+			$message = '[onPacket_callBack_excaption] [code]' . $ex->getCode() . ' [message]' .
 				$ex->getMessage() . '[file]' . $ex->getFile() . '[line]' . $ex->getLine() . PHP_EOL;
 			switch ( $ex->getCode() ) {
 				case AHA_ROUTER_EXCEPTION : 
