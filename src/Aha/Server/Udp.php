@@ -26,7 +26,7 @@ class Udp extends Server {
 	 *			不会去做那种过度封装的工作 最大的自由留给开发者
 	 * @return \Aha\Server
 	 */
-	public function __construct(\swoole_server $server, \string $appName = '', array $arrSetting = array() ) {
+	public function __construct(\swoole_server $server,  $appName = '', array $arrSetting = array() ) {
 		parent::__construct($server, $appName, $arrSetting);
 		return $this;
 	}
@@ -44,7 +44,7 @@ class Udp extends Server {
 	 * @param string $data 可以是文本或二进制内容
 	 * @param array $clientInfo 包括address、port、server_socker 3
 	 */
-	public function onPacket(\swoole_server $server, \string $data, $clientInfo) {
+	public function onPacket(\swoole_server $server,  $data, $clientInfo) {
 		
 	}
 	

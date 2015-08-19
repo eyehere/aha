@@ -41,7 +41,7 @@ class Router {
 	 * @param string $delimeter
 	 * @return \Aha\Mvc\Router
 	 */
-	public function __construct(\Aha\Bootstrap $bootstrap, \string $uri, \string $delimeter='/') {
+	public function __construct(\Aha\Bootstrap $bootstrap,  $uri,  $delimeter='/') {
 		$this->_objBootstrap = $bootstrap;
 		$this->_uri			= trim(str_replace(array(' ','.'),'',$uri), "${delimeter}/");
 		$this->_delimiter	= $delimeter;
@@ -112,7 +112,7 @@ class Router {
 	 * @return type
 	 * @throws \Exception
 	 */
-	protected function _detect(array $arrElements, \string $append = '' ) {
+	protected function _detect(array $arrElements,  $append = '' ) {
 		$appNamespace = $this->_objBootstrap->getAppNamespace();
 		$appPath	  = $this->_objBootstrap->getLoader()->getPathByByNamespace($appNamespace);
 		
@@ -164,7 +164,7 @@ class Router {
 	 * @param string $actionPath
 	 * @return boolean
 	 */
-	public static function validate(\string $actionPath) {
+	public static function validate( $actionPath) {
 		if ( !in_array($actionPath, self::$_arrActions) ) {
 			return false;
 		}

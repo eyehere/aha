@@ -34,13 +34,13 @@ class Pool {
 	
 	/**
 	 * @brief 获取http client的实例
-	 * @param \string $method
-	 * @param \string $url
-	 * @param \int $timeout
+	 * @param  $method
+	 * @param  $url
+	 * @param  $timeout
 	 * @param \float $connectTimeout
 	 * @return \Aha\Client\Http
 	 */
-	public static function getHttpClient(\string $method,\string $url, $timeout = 1, $connectTimeout = 0.05) {
+	public static function getHttpClient( $method, $url, $timeout = 1, $connectTimeout = 0.05) {
 		if ( !empty(self::$_httpPools) ) {
 			foreach (self::$_httpPools as $key=>$client) {
 				unset(self::$_httpPools[$key]);

@@ -67,7 +67,7 @@ abstract class Client {
 	 * @brief 初始化client
 	 * @param \swoole_client $client
 	 */
-	public function __construct(\swoole_client $client, \string $host, \int $port, $timeout=1, $connectTimeout=0.05) {
+	public function __construct(\swoole_client $client,  $host,  $port, $timeout=1, $connectTimeout=0.05) {
 		if ( $timeout < 0.1 || $timeout > 10 ) {
 			throw new \Exception("The littlest timeout is 0.1 seconds and the longest is 10 second!now $timeout");
 		}

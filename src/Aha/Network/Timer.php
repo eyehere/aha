@@ -63,10 +63,10 @@ class Timer {
 	
 	/**
 	 * @brief 从定时器中删除事件
-	 * @param \int $eventId
+	 * @param  $eventId
 	 * @return boolean
 	 */
-	public static function del(\int $eventId) {
+	public static function del( $eventId) {
 		if ( isset(self::$_arrEvents[$eventId]) ) {
 			unset(self::$_arrEvents[$eventId]);
 		}

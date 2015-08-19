@@ -39,7 +39,7 @@ abstract class Server {
 	 *			不会去做那种过度封装的工作 最大的自由留给开发者
 	 * @return \Aha\Server
 	 */
-	public function __construct(\swoole_server $server, \string $appName='', array $arrSetting = array() ) {
+	public function __construct(\swoole_server $server,  $appName='', array $arrSetting = array() ) {
 		$this->_objServer = $server;
 		if ( !empty($appName) ) {
 			$this->_appName = $appName;
@@ -53,10 +53,10 @@ abstract class Server {
 	
 	/**
 	 * @brief 设置var目录
-	 * @param \string $directory
+	 * @param  $directory
 	 * @return \Aha\Network\Server
 	 */
-	public function setVarDirectory(\string $directory) {
+	public function setVarDirectory( $directory) {
 		$this->_varDirectory = $directory;
 		return $this;
 	}
@@ -168,7 +168,7 @@ abstract class Server {
 	 * 在onWorkerStart之前载入公共的不易改变的代码：所有worker共享，不需要额外的内存
 	 * 想用$server->reload()重载代码，必须在onWorkerStart中require业务文件
 	 */
-	public function onWorkerStart(\swoole_server $server, \int $workerId) {
+	public function onWorkerStart(\swoole_server $server,  $workerId) {
 		if (function_exists('apc_clear_cache') ) {
 			apc_clear_cache();
 		}
@@ -178,9 +178,10 @@ abstract class Server {
 		
 		//register_shutdown_function( array($this,'handleFatal') );
 		
-		if ( $workerId >= $this->_objServer->setting['worker_num'] ) {
+		if ( $workerId >= $this->_objServer->setting['worker_num'] &&
+			 function_exists('cli_set_process_title') ) {
 			cli_set_process_title($this->_appName .'-Task-'.$workerId);
-		} else {
+		} elseif ( function_exists('cli_set_process_title') ) {
 			cli_set_process_title($this->_appName .'-Worker-'.$workerId);
 			//swoole的网络IO没有读写超时控制，增加一个定时器处理网络读写超时控制
 			/*$server->tick(100, function(){
@@ -196,14 +197,14 @@ abstract class Server {
 	 * @param int $taskId
 	 * @param string $data
 	 */
-	public function onFinish(\swoole_server $server, \int $taskId, \string $data) {
+	public function onFinish(\swoole_server $server,  $taskId,  $data) {
 		
 	}
 	
 	/**
 	 * @brief 在worker进程终止的时候发生，可以回收worker进程申请的各类资源
 	 */
-	public function onWorkerStop(\swoole_server $server, \int $workerId) {
+	public function onWorkerStop(\swoole_server $server,  $workerId) {
 		if ( $workerId >= $this->_objServer->setting['worker_num'] ) {
 			echo '[' . date('Y-m-d H:i:s') . "] Task worker [$workerId] stoped!" . PHP_EOL;
 		} else {
@@ -216,7 +217,7 @@ abstract class Server {
 	 * $taskId和$fromId组合起来才是全局唯一的，不同的worker进程投递的任务ID可能会相同
 	 * 通过return触发worker进程的onFinish函数，表示投递task完成
 	 */
-	public function onTask(\swoole_server $server, \int $taskId, \int $fromId, \string $data) {
+	public function onTask(\swoole_server $server,  $taskId,  $fromId,  $data) {
 		
 	}
 	
@@ -224,7 +225,7 @@ abstract class Server {
 	 * @brief 当工作进程收到sendMessage发送的管道消息时会触发onPipeMessage事件
 	 * worker/task进程都可能触发
 	 */
-	public function onPipeMessage(\swoole_server $server, \int $fromWorkerId, \string $message) {
+	public function onPipeMessage(\swoole_server $server,  $fromWorkerId,  $message) {
 		
 	}
 	
@@ -259,7 +260,7 @@ abstract class Server {
 	 * @brief 定时器触发
 	 * $interval的值用来区分是哪个定时器触发的
 	 */
-	public function onTimer(\swooler_server $server, \int $interval) {
+	public function onTimer(\swooler_server $server,  $interval) {
 		
 	}
 	
@@ -267,7 +268,7 @@ abstract class Server {
 	 * @brief 当worker/task进程发生异常会在Manager进程内回调此函数
 	 * 主要用于监控和报警 很有可能遇到了致命错误或者coredump
 	 */
-	public function onWorkerError(\swoole_server $server, \int $workerId, \int $workerPid, \int $exitCode) {
+	public function onWorkerError(\swoole_server $server,  $workerId,  $workerPid,  $exitCode) {
 		echo "[onWorkerError_CALLBACK] [workerId]$workerId [workerPid]$workerPid [exitCode]$exitCode" . PHP_EOL;
 	}
 	

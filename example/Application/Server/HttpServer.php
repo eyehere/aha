@@ -43,7 +43,7 @@ class HttpServer extends Http {
 	 * @param \swoole_server $server
 	 * @param int $workerId
 	 */
-	public function onWorkerStart(\swoole_server $server, int $workerId) {
+	public function onWorkerStart(\swoole_server $server, $workerId) {
 		parent::onWorkerStart($server, $workerId);
 		define('APP_NAME','Application');
 		define('APPLICATION_PATH', dirname(dirname(__DIR__)));

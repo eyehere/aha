@@ -51,7 +51,7 @@ class Dispatcher {
 	 * @param \Aha\Mvc\Aha\Bootstrap $bootstrap
 	 * @return \Aha\Mvc\Dispatcher
 	 */
-	public function __construct(\Aha\Bootstrap $bootstrap, \string $protocal = 'http') {
+	public function __construct(\Aha\Bootstrap $bootstrap,  $protocal = 'http') {
 		$this->_objBootstrap = $bootstrap;
 		$this->_protocal	 = $protocal;
 		return $this;
@@ -117,10 +117,10 @@ class Dispatcher {
 	
 	/**
 	 * @brief tcp set fd
-	 * @param \int $fd
+	 * @param  $fd
 	 * @return \Aha\Mvc\Dispatcher
 	 */
-	public function setTcpClientFd(\int $fd) {
+	public function setTcpClientFd( $fd) {
 		$this->_tcpClientFd = $fd;
 		return $this;
 	}
@@ -135,10 +135,10 @@ class Dispatcher {
 	
 	/**
 	 * @brief tcp set fromId
-	 * @param \int $fromId
+	 * @param  $fromId
 	 * @return \Aha\Mvc\Dispatcher
 	 */
-	public function setTcpFromId(\int $fromId) {
+	public function setTcpFromId( $fromId) {
 		$this->_tcpFromId = $fromId;
 		return $this;
 	}
@@ -153,10 +153,10 @@ class Dispatcher {
 	
 	/**
 	 * @brief tcp set package
-	 * @param \string $data
+	 * @param  $data
 	 * @return \Aha\Mvc\Dispatcher
 	 */
-	public function setTcpPackage(\string $data) {
+	public function setTcpPackage( $data) {
 		$this->_tcpPackage = $data;
 		return $this;
 	}
@@ -171,10 +171,10 @@ class Dispatcher {
 	
 	/**
 	 * @brief udp set package
-	 * @param \string $data
+	 * @param  $data
 	 * @return \Aha\Mvc\Dispatcher
 	 */
-	public function setUdpPackage(\string $data) {
+	public function setUdpPackage( $data) {
 		$this->_udpPackage = $data;
 		return $this;
 	}

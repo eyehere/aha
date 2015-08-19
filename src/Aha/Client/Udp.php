@@ -21,12 +21,12 @@ class Udp extends Client {
 	
 	/**
 	 * @brief 初始化一个udp客户端
-	 * @param \string $host
-	 * @param \int $port
+	 * @param  $host
+	 * @param  $port
 	 * @param type $timeout
 	 * @param type $connectTimeout
 	 */
-	public function __construct(\string $host, \int $port, $timeout = 1, $connectTimeout = 0.05) {
+	public function __construct( $host,  $port, $timeout = 1, $connectTimeout = 0.05) {
 		$client = new \swoole_client(SWOOLE_SOCK_UDP, SWOOLE_SOCK_ASYNC);
 		parent::__construct($client, $host, $port, $timeout, $connectTimeout);
 		$this->_initConfig();

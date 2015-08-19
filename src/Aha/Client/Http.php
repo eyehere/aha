@@ -38,12 +38,12 @@ class Http extends Client {
 
 	/**
 	 * @brief 初始化一个http客户端
-	 * @param \string $method
-	 * @param \string $url
+	 * @param  $method
+	 * @param  $url
 	 * @param type $timeout
 	 * @param type $connectTimeout
 	 */
-	public function __construct(\string $method,\string $url, $timeout = 1, $connectTimeout = 0.05) {
+	public function __construct( $method, $url, $timeout = 1, $connectTimeout = 0.05) {
 		if ( !in_array($method, array('GET','POST')) ) {
 			throw new Exception("unsupport http method {$method}");
 		}
@@ -75,6 +75,10 @@ class Http extends Client {
 			'Accept-Encoding'	=> 'gzip,deflate,sdch'
 		);
 		
+		if ( function_exists('gzdecode') ) {
+			$this->_requestHeaders['Accept-Encoding'] = 'gzip,deflate,sdch';
+		}
+
 		if ( $this->_method === 'POST' ) {
 			$this->_requestHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
 		}
@@ -307,10 +311,10 @@ class Http extends Client {
 	/**
 	 * @brief 解压响应数据包
 	 * @param type $data
-	 * @param \string $type
+	 * @param  $type
 	 * @return type
 	 */
-	public static function gzDecode($data, \string $type = 'gzip') {
+	public static function gzDecode($data,  $type = 'gzip') {
         if ($type == 'gzip') {
             return gzdecode($data);
         } elseif ($type == 'deflate') {

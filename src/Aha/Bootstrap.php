@@ -45,7 +45,7 @@ class Bootstrap {
 	 * @param string $environ
 	 * @return type
 	 */
-	public static function getInstance(\string $appNamespace, \string $environ = 'product') {
+	public static function getInstance( $appNamespace,  $environ = 'product') {
 		if ( null === self::$_instance ) {
 			self::$_instance = new \Aha\Bootstrap($appNamespace, $environ);
 		}
@@ -58,7 +58,7 @@ class Bootstrap {
 	 * @param string $environ
 	 * @return \Aha\Bootstrap
 	 */
-	public function __construct(\string $appNamespace, \string $environ = 'product') {
+	public function __construct( $appNamespace,  $environ = 'product') {
 		$this->_appNamespace	= $appNamespace;
 		$this->_environ			= $environ;
 		$this->_initEnv();

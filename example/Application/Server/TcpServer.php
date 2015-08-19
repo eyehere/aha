@@ -67,11 +67,11 @@ class TcpServer extends Tcp {
 	/**
 	 * @brief 请求初始化
 	 * @param \swoole_server $server
-	 * @param \int $fd
-	 * @param \int $fromId
-	 * @param \string $data
+	 * @param  $fd
+	 * @param  $fromId
+	 * @param  $data
 	 */
-	public function onReceive(\swoole_server $server, \int $fd, \int $fromId, \string $data) {
+	public function onReceive(\swoole_server $server,  $fd,  $fromId,  $data) {
 		parent::onReceive($server, $fd, $fromId, $data);
 		try {
 			$arrRequest = json_decode($data, true);

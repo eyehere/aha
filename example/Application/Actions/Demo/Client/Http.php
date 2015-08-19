@@ -16,7 +16,6 @@
 */
 namespace Application\Actions\Demo\Client;
 use \Aha\Mvc\Action;
-use \Aha\Client\Http;
 use \Aha\Client\Multi;
 
 class Http extends Action {

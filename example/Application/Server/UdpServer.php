@@ -67,10 +67,10 @@ class UdpServer extends Udp {
 	/**
 	 * @brief Udp 请求初始化
 	 * @param \swoole_server $server
-	 * @param \string $data
+	 * @param  $data
 	 * @param type $clientInfo
 	 */
-	public function onPacket(\swoole_server $server, \string $data, $clientInfo) {
+	public function onPacket(\swoole_server $server,  $data, $clientInfo) {
 		parent::onPacket($server, $data, $clientInfo);
 		try {
 			$arrRequest = json_decode($data, true);

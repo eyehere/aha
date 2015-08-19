@@ -28,7 +28,7 @@ class Loader {
 	 * @param type $path
 	 * @return \Aha\Mvc\Loader
 	 */
-	public function __construct(\string $namespace = null, $path = null) {
+	public function __construct( $namespace = null, $path = null) {
 		if ( null !== $namespace && null !== $path ) {
 			$this->_arrMap[$namespace] = $path;
 		}
@@ -41,7 +41,7 @@ class Loader {
 	 * @param type $path
 	 * @return type
 	 */
-	public static function getInstance(\string $namespace = null, $path = null) {
+	public static function getInstance( $namespace = null, $path = null) {
 		if ( null === self::$_instance ) {
 			self::$_instance = new \Aha\Mvc\Loader($namespace, $path);
 		}
@@ -54,7 +54,7 @@ class Loader {
 	 * @param \Aha\Mvc\sring $path
 	 * @return \Aha\Mvc\Loader
 	 */
-	public function registerNamespace(\string $namespace, $path) {
+	public function registerNamespace( $namespace, $path) {
 		$this->_arrMap[$namespace] = $path;
 		return $this;
 	}
@@ -64,7 +64,7 @@ class Loader {
 	 * @param string $namespace
 	 * @return boolean
 	 */
-	public function getPathByByNamespace(\string $namespace) {
+	public function getPathByByNamespace( $namespace) {
 		if ( !isset($this->_arrMap[$namespace]) ) {
 			return false;
 		}

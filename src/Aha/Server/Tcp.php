@@ -26,7 +26,7 @@ class Tcp extends Server {
 	 *			不会去做那种过度封装的工作 最大的自由留给开发者
 	 * @return \Aha\Server
 	 */
-	public function __construct(\swoole_server $server, \string $appName = '', array $arrSetting = array() ) {
+	public function __construct(\swoole_server $server,  $appName = '', array $arrSetting = array() ) {
 		parent::__construct($server, $appName, $arrSetting);
 		return $this;
 	}
@@ -44,7 +44,7 @@ class Tcp extends Server {
 	 * @brief 有新的连接进入时，在worker进程中回调
 	 * UDP协议下没有onConnect/onClose事件
 	 */
-	public function onConnect(\swoole_server $server, \int $fd, \int $fromId) {
+	public function onConnect(\swoole_server $server,  $fd,  $fromId) {
 		
 	}
 	
@@ -58,7 +58,7 @@ class Tcp extends Server {
 	 * 开启open_eof_check/open_length_check/open_http_protocol,可以保证数据包的完整性
 	 * @param string $data 可能是文本或者二进制内容
 	 */
-	public function onReceive(\swoole_server $server, \int $fd, \int $fromId, \string $data) {
+	public function onReceive(\swoole_server $server,  $fd,  $fromId,  $data) {
 		
 	}
 	
@@ -67,7 +67,7 @@ class Tcp extends Server {
 	 * onClose回调函数如果发生了致命错误，会导致链接泄漏。
 	 * 通过netstat命令会看到大量的CLOSE_WAIT状态的TCP连接
 	 */
-	public function onClose(\swoole_server $server, \int $fd, \int $fromId) {
+	public function onClose(\swoole_server $server,  $fd,  $fromId) {
 		
 	}
 	
