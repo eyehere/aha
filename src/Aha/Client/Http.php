@@ -235,7 +235,7 @@ class Http extends Client {
 		}
 		
 		if ( null !== $this->_timer ) {
-			\Aha\Network\Timer::del($this->_timer);
+			//\Aha\Network\Timer::del($this->_timer);
 		}
 		
 		if ( isset($this->_responseHeader['content-encoding']) ) {

@@ -191,6 +191,7 @@ abstract class Client {
 	 */
 	public function loop() {
 		$this->_const = microtime(true);
+		/*
 		if ( floatval($this->_timeout) > 0 ) {
 			$response = array(
 				'errno'		=> \Aha\Network\Client::ERR_REQUEST_TIMEOUT, 
@@ -201,7 +202,7 @@ abstract class Client {
 				'data'		=> array()
 			);
 			$this->_timer = \Aha\Network\Timer::add($this->_callback, $response, $this->_objClient);
-		}
+		}*/
 		return $this;
 	}
 	
