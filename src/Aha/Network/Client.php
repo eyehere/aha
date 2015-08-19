@@ -98,7 +98,6 @@ abstract class Client {
 	 */
 	public function onConnect(\swoole_client $client) {
 		if ( ! $client->send($this->_package) ) {
-			$client->close();
 			$response = array(
 				'errno'		=> \Aha\Network\Client::ERR_SEND_FAILED, 
 				'errmsg'	=> array('errCode'=>$client->errCode, 'error'=>  socket_strerror($client->errCode)),
@@ -107,6 +106,7 @@ abstract class Client {
 				'data'		=> array()
 			);
 			call_user_func($this->_callback, $response);
+			$client->close();
 		}
 	}
 	
@@ -118,11 +118,15 @@ abstract class Client {
 	abstract function onReceive(\swoole_client $client, $data);
 	
 	/**
+	 * @brief 资源释放
+	 */
+	abstract protected function _free();
+	
+	/**
 	 * @brief 发生错误时的回调
 	 * @param \swoole_client $client
 	 */
 	public function onError(\swoole_client $client) {
-		$client->close();
 		$response = array(
 			'errno'		=> \Aha\Network\Client::ERR_UNEXPECT, 
 			'errmsg'	=> array('errCode'=>$client->errCode, 'error'=>  socket_strerror($client->errCode)),
@@ -131,6 +135,7 @@ abstract class Client {
 			'data'		=> array()
 		);
 		call_user_func($this->_callback, $response);
+		$client->close();
 	}
 	
 	/**
@@ -138,7 +143,7 @@ abstract class Client {
 	 * @param \swoole_client $client
 	 */
 	public function onClose(\swoole_client $client) {
-		
+		$this->_free();
 	}
 	//================client callback END======================================
 	/**

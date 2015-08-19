@@ -44,7 +44,8 @@ class Http extends Action {
 		$mutli->register($http2);
 		$mutli->loop(array($this,'output'));
 		*/
-		$http = new Http('GET', 'http://www.jd.com/');
+		$http = \Aha\Client\Pool::getHttpClient('GET', 'http://www.jd.com/');
+		//$http = new Http('GET', 'http://www.jd.com/');
 		$http->setRequestId('contentLength');
 		$http->setCallback( array($this, 'output') );
 		$http->loop();
@@ -73,6 +74,10 @@ class Http extends Action {
 //		} else {
 //			$response->end(json_encode($data['data']['trunked']));
 //		}
+	}
+	
+	public function __destruct() {
+		var_dump(__METHOD__);
 	}
 	
 } 

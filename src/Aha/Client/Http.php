@@ -57,7 +57,6 @@ class Http extends Client {
 			$this->_port = 443;
 		}
 		$this->_path = isset($arrUrl['path']) ? $arrUrl['path'] : '/';
-		
 		$client = new \swoole_client(SWOOLE_SOCK_TCP , SWOOLE_SOCK_ASYNC);
 		parent::__construct($client, $this->_host, $this->_port, $timeout, $connectTimeout);
 		$this->_init();
@@ -235,7 +234,6 @@ class Http extends Client {
 			return AHA_AGAIN;
 		}
 		
-		$client->close();
 		if ( null !== $this->_timer ) {
 			\Aha\Network\Timer::del($this->_timer);
 		}
@@ -256,6 +254,7 @@ class Http extends Client {
 			)
 		);
 		call_user_func($this->_callback, $response);
+		$client->close();
 	}
 
 	/**
@@ -264,7 +263,7 @@ class Http extends Client {
 	 * @param type $data
 	 */
 	public function onReceive(\swoole_client $client, $data) {
-		call_user_func(array($this, '_unPackResponse'), $client, $data);
+		$this->_unPackResponse($client, $data);
 	}
 	
 	/**
@@ -276,6 +275,35 @@ class Http extends Client {
 		$this->_objClient->connect($this->_host, $this->_port, $this->_connectTimeout);
 	}
 	
+	/**
+	 * @brief 资源释放
+	 */
+	protected function _free() {
+		$this->_url		= null;//url
+	
+		$this->_requestHeaders	= null;//请求头
+		$this->_query			= null;//Query String 请求get参数
+		$this->_requestBody		= null;//Post Body 请求体
+
+		$this->_host	= null;//host
+
+		$this->_responseHeader	= null;//响应头
+		$this->_responseBody	= null;//响应body
+
+		$this->_buffer		= null;//响应buffer
+		$this->_trunkLength	= null;//transfer-encoding:chunked时
+		$this->_objClient	= null;
+
+		$this->_requestId	= null;
+		$this->_package	= null;
+		$this->_timer = null;
+		
+		$this->_callback = null;//重要 释放了callback以后才能释放MVC
+		
+		\Aha\Client\Pool::free($this);//把当前对象
+	}
+
+
 	/**
 	 * @brief 解压响应数据包
 	 * @param type $data
@@ -294,4 +322,7 @@ class Http extends Client {
         }
     }
 
+	public function __destruct() {
+		var_dump(__METHOD__);
+	}
 }
