@@ -300,7 +300,7 @@ class Http extends Client {
 		
 		$this->_callback = null;//重要 释放了callback以后才能释放MVC
 		
-		\Aha\Client\Pool::free($this);//把当前对象
+		\Aha\Client\Pool::freeHttp($this);//把当前对象
 	}
 
 
