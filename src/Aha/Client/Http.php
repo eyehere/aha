@@ -72,7 +72,7 @@ class Http extends Client {
 			'User-Agent'		=> 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36',
 			'Accept'			=> 'text/xml,application/xml,application/xhtml+xml,text/html,text/plain,image/png,image/jpeg,image/gif,*/*',
 			'Accept-Language'	=> 'zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4,ja;q=0.2',
-			'Accept-Encoding'	=> 'gzip,deflate,sdch'
+			'Accept-Encoding'	=> 'deflate,sdch'
 		);
 		
 		if ( function_exists('gzdecode') ) {
