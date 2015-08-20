@@ -134,8 +134,13 @@ abstract class Client {
 			'const'		=> microtime(true) - $this->_const,
 			'data'		=> array()
 		);
+		
 		call_user_func($this->_callback, $response);
-		$client->close();
+		if ( $client->isConnected() ) {
+			$client->close();
+		} else {
+			$this->_free();
+		}
 	}
 	
 	/**
