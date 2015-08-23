@@ -15,7 +15,13 @@
   +----------------------------------------------------------------------+
 */
 return array(
-	'key'	=> array(
-		'key'	=> 'value'
+	'test'	=>	array(
+		'host'		=>	'127.0.0.1',
+		'port'		=>	3306,
+		'user'		=>	'root',
+		'password'	=>	'',
+		'dbName'	=>	'test',
+		'charset'	=>	'utf-8',
+		'poolSize'	=>	100
 	)
 );
