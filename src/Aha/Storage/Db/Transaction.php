@@ -128,6 +128,7 @@ class Transaction {
 		
 		//事务已经执行完 提交事务
 		if ( $this->_current === count($this->_arrQueueKey) ) {
+			$this->_recordTransResult($prevResult, $dbObj);
 			return $this->_commit($dbSock);
 		}
 		
@@ -193,14 +194,8 @@ class Transaction {
 	 * @return type
 	 */
 	private function _nextQuery($prevResult, $dbObj, $dbSock) {
-		$key = $this->_arrQueueKey[$this->_current-1];
-		$arrData = array(
-			'result'		=> $prevResult,
-			'affected_rows'	=> $dbObj->affected_rows,
-			'last_insert_id'=> $dbObj->insert_id
-		);
-		$this->_arrResult[$key] = $arrData;
-
+		$this->_recordTransResult($prevResult, $dbObj);
+		
 		$sql = $this->_arrQueue[$this->_current];
 		/**如果后面的sql依赖前面的执行结果
 		 * $sql = function($data) {
@@ -214,6 +209,21 @@ class Transaction {
 		}
 		$this->_dbObj->query($sql, array($this, 'transCallback'), false, $dbSock);
 		return $this->_current++;
+	}
+	
+	/**
+	 * @brief 记录每个事务队列执行的结果
+	 * @param type $prevResult
+	 * @param type $dbObj
+	 */
+	private function _recordTransResult($prevResult, $dbObj) {
+		$key = $this->_arrQueueKey[$this->_current-1];
+		$arrData = array(
+			'result'		=> $prevResult,
+			'affected_rows'	=> $dbObj->affected_rows,
+			'last_insert_id'=> $dbObj->insert_id
+		);
+		$this->_arrResult[$key] = $arrData;
 	}
 	
 	/**

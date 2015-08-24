@@ -64,11 +64,11 @@ class Mysqli {
 	public function __construct($dbConf) {
 		if ( empty($dbConf['host']) || empty($dbConf['port']) || empty($dbConf['user']) || 
 			 empty($dbConf['password']) || empty($dbConf['dbName']) || empty($dbConf['poolSize']) ) {
-			throw new Exception("Please check your db config,required:host,port,user,password,dbName,poolSize.");
+			throw new \Exception("Please check your db config,required:host,port,user,password,dbName,poolSize.");
 		}
 		
 		if ( !function_exists('swoole_get_mysqli_sock') ) {
-			throw new Exception("function swoole_get_mysqli_sock not exists");
+			throw new \Exception("function swoole_get_mysqli_sock not exists");
 		}
 		
 		$this->_conf			= $dbConf;
@@ -100,7 +100,7 @@ class Mysqli {
 			echo "Mysqli Error [swoole_get_mysqli_sock]" . serialize($dbSock) . PHP_EOL;
 			goto errorClose;
 		}
-		$ret = swoole_event_add($dbSock, array($this, '_onRead'));
+		$ret = swoole_event_add($dbSock, array($this, 'onQueryResponse'));
 		if ( !is_long($ret) ) {
 			echo "Mysqli Error [swoole_event_add]" . serialize($ret) . PHP_EOL;
 			goto errorClose;
@@ -140,7 +140,7 @@ class Mysqli {
 	 * @param type $dbSock
 	 * @return boolean
 	 */
-	protected function _onRead($dbSock) {
+	public function onQueryResponse($dbSock) {
 		$task = isset($this->_busyPool[$dbSock]) ? $this->_busyPool[$dbSock] : null;
 		if ( empty($task) ) {//这种情况直接丢弃
 			echo "MySQLi Warning: Maybe SQLReady receive a Close event , "
@@ -169,7 +169,7 @@ class Mysqli {
 			echo "MySQLi onReadCallback Error:[SQL] {$sql} [error]" . mysqli_error($dbObj) . PHP_EOL;
 		}
 		
-		$this->_onReadTrans($dbSock, $result, $onReadFree);
+		$this->_onReadTrans($dbObj,$dbSock, $result, $onReadFree);
 		
 		$this->_trigger();
 	}
@@ -181,7 +181,7 @@ class Mysqli {
 	 * @param type $onReadFree
 	 * @return type
 	 */
-	private function _onReadTrans($dbSock, $result, $onReadFree) {
+	private function _onReadTrans($dbObj,$dbSock, $result, $onReadFree) {
 		$arrTransKeep = array(
 			\Aha\Storage\Db\Transaction::TRANS_COMMIT,
 			\Aha\Storage\Db\Transaction::TRANS_ROLLBACK
@@ -248,10 +248,11 @@ class Mysqli {
 			$db = array_shift($this->_idlePool);
 		}
 		$mysqli = $db['dbObj'];
+		$mysqliSock = $db['dbSock'];
 		
 		$result = $mysqli->query($sql, MYSQLI_ASYNC);
 		if ( false !== $result ) {
-			$this->_busyPool[$dbSock] = array_merge($db,compact('sql','callback','onReadFree'));
+			$this->_busyPool[$mysqliSock] = array_merge($db,compact('sql','callback','onReadFree'));
 			return true;
 		}
 		
@@ -264,7 +265,7 @@ class Mysqli {
 		if ( $mysqli->errno == 2013 || $mysqli->errno == 2006 ) {
 			echo "Mysqli Expected Error[errno]{$mysqli->errno} [error]{$mysqli->error} [SQL] $sql" . PHP_EOL;
 			$this->_close($db['dbSock']);//连接中断的重新建立新的连接
-			return $this->query($sql, $callback, $onReadFree, $dbSock, $retry++);
+			return $this->query($sql, $callback, $onReadFree, $mysqliSock, $retry++);
 		}
 		//其它异常情况 需要通知宿主 但不用关闭连接 可能是sql写错
 		echo "Mysqli Unexpected Error[errno]{$mysqli->errno} [error]{$mysqli->error} [SQL] $sql" . PHP_EOL;
