@@ -31,7 +31,7 @@ class Trans extends Action {
 					$sql = 'insert into friends set user_id=6,friend_id='.$friendId;
 					return $sql;
 				})
-				->queue('friendsPlus','insert into friends set user_id=100000,friend_id=1000000')
+				//->queue('friendsPlus','insert into friends set user_id=100000,friend_id=1000000')
 				->setCallback(array($this, 'QueryDbCallback'))
 				->execute();
 	}

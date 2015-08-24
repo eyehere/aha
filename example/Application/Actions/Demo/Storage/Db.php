@@ -24,7 +24,7 @@ class Db extends Action {
 		$dbName = 'test';
 		$dbConf = $config->get('database', $dbName);
 		$conn = \Aha\Storage\Db\Pool::getConnection($dbName, $dbConf);
-		$conn->query("select * from user", array($this, 'QueryDbCallback'));
+		$conn->query("select * from friends limit 10", array($this, 'QueryDbCallback'));
 	}
 	
 	public function QueryDbCallback($result, $dbObj, $dbSock) {
