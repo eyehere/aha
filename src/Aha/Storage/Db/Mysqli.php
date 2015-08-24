@@ -73,7 +73,7 @@ class Mysqli {
 		
 		$this->_conf			= $dbConf;
 		$this->_connectionNum	= 0;
-		$this->_poolSize		= $dbConf['poolSize'];
+		$this->_poolSize		= intval($dbConf['poolSize']);
 		return $this;
 	}
 	
@@ -86,7 +86,8 @@ class Mysqli {
 				$this->_conf['password'], $this->_conf['dbName'], $this->_conf['port']);
 		
 		if ( $dbObj->connect_error ) {
-			echo "Mysqli Error [connect_db_failed]" . serialize($this->_conf) . PHP_EOL;
+			echo "Mysqli Error [connect_db_failed][errno]{$dbObj->connect_errno}"
+			. "[error]{$dbObj->connect_error} [conf]" . serialize($this->_conf) . PHP_EOL;
 			return false;
 		}
 		
@@ -95,10 +96,23 @@ class Mysqli {
 		}
 		
 		$dbSock = swoole_get_mysqli_sock($dbObj);
-		swoole_event_add($dbSock, array($this, '_onRead'));
+		if ( !is_long($dbSock) ) {
+			echo "Mysqli Error [swoole_get_mysqli_sock]" . serialize($dbSock) . PHP_EOL;
+			goto errorClose;
+		}
+		$ret = swoole_event_add($dbSock, array($this, '_onRead'));
+		if ( !is_long($ret) ) {
+			echo "Mysqli Error [swoole_event_add]" . serialize($ret) . PHP_EOL;
+			goto errorClose;
+		}
+		
 		$this->_idlePool[$dbSock] = compact('dbObj','dbSock');
 		$this->_connectionNum++;
 		return $this;
+		
+		errorClose:
+			$dbObj->close();
+			return false;
 	}
 	
 	/**
@@ -137,7 +151,7 @@ class Mysqli {
 		
 		$callback	= $task['callback'];
 		$dbObj		= $task['dbObj'];
-		$onReadFree	= $task['onReadFree'];
+		$onReadFree	= $task['onReadFree'];//正常只能是true or false，事务中有三个标记
 		$sql		= $task['sql'];
 		
 		$result = $dbObj->reap_async_query();
@@ -181,7 +195,7 @@ class Mysqli {
 		
 		//事务处理过程中，此连接不能被释放
 		//commit or rollback成功 连接暂时不能被释放
-		if ( false === $onReadFree || ($result && in_array($onReadFree, $arrTransKeep)) ) {
+		if ( false === $onReadFree || ($result && in_array($onReadFree, $arrTransKeep, true)) ) {
 			return;
 		}
 		
@@ -190,7 +204,7 @@ class Mysqli {
 		//如果事务的set autocommit＝1失败，这个连接不能接着用了
 		//commit失败 这个连接也不能用了
 		//rollback失败 还是不能用
-		if ( in_array($onReadFree, $arrTrans) && !$result ) {
+		if ( in_array($onReadFree, $arrTrans, true) && !$result ) {
 			return $this->_close($dbSock);
 		}
 
@@ -215,9 +229,10 @@ class Mysqli {
 			$task = array_shift($this->_poolQueue);
 			$this->_doQuery($task['sql'], $task['callback'], $task['onReadFree']);
 		}
+		echo "Mysqli _trigger [DEBUG] [cnt] $idleCnt" . PHP_EOL;
 	}
 
-		/**
+	/**
 	 * @brief 执行查询
 	 * @param type $sql
 	 * @param type $callback
@@ -241,7 +256,7 @@ class Mysqli {
 		}
 		
 		//事务中途出现错误，不能rollback，也不必rollback，直接错了
-		if ( null !== $dbSock ) {
+		if ( null !== $dbSock ) {//这种情况下 上一阶段 set autocommit=0 成功
 			$this->_queryFailedNotify($callback, $dbSock);//事务中途出错的连接不能再用
 			return true;
 		}
@@ -251,7 +266,9 @@ class Mysqli {
 			$this->_close($db['dbSock']);//连接中断的重新建立新的连接
 			return $this->query($sql, $callback, $onReadFree, $dbSock, $retry++);
 		}
+		//其它异常情况 需要通知宿主 但不用关闭连接 可能是sql写错
 		echo "Mysqli Unexpected Error[errno]{$mysqli->errno} [error]{$mysqli->error} [SQL] $sql" . PHP_EOL;
+		$this->_queryFailedNotify($callback);
 		return false;
 	}
 	
@@ -266,6 +283,7 @@ class Mysqli {
 	public function query($sql, $callback, $onReadFree = true, $dbSock = null, $retry = 0) {
 		if ( $retry >= 1 ) {
 			echo "Mysqli Error:[retry exception] [SQL]$sql" . PHP_EOL;
+			$this->_queryFailedNotify($callback, $dbSock);//2013和2006重试两次了 直接关闭得了
 			return false;
 		}
 		//用于事务指定在同一个连接上进行query
@@ -279,6 +297,7 @@ class Mysqli {
 		//连接池动态增长
 		if ( $this->_connectionNum < $this->_poolSize ) {
 			if ( false === $this->_connect() ) {
+				echo "Mysqli Error:[expand connect error] [SQL]$sql" . PHP_EOL;
 				$this->_queryFailedNotify($callback);
 				return false;
 			}
@@ -307,9 +326,9 @@ class Mysqli {
 			$this->_close($dbSock);
 		}
 		try {
-			call_user_func($callback, false, false, fase);
+			call_user_func($callback, false, false, false);
 		} catch (\Exception $e) {
-			echo "Mysqli _queryFailedNitify Exception: {$e->getMessage()}" . PHP_EOL;
+			echo "Mysqli _queryFailedNotify Exception: {$e->getMessage()}" . PHP_EOL;
 		}
 	}
 

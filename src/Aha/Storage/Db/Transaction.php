@@ -73,6 +73,7 @@ class Transaction {
 		$this->_current		= 0;
 		$this->_arrResult	= array();
 		$this->_dbObj		= $dbObj;
+		$this->_callback	= null;
 	}
 
 	/**
@@ -178,6 +179,8 @@ class Transaction {
 	 */
 	private function _rollback($dbSock) {
 		$this->_current = count($this->_arrQueueKey) + 1;
+		//rollback成功 $this->_arrResult也得是false
+		$this->_arrResult = false;//回滚的话回调结果直接置为false即可
 		$sql = 'rollback';
 		return $this->_dbObj->query($sql, array($this, 'transCallback'), false, $dbSock);
 	}
@@ -272,7 +275,7 @@ class Transaction {
 		}
 		
 		if ( count($this->_arrQueueKey) <=1 ) {
-			throw new Exception("Transaction require more then two sql");
+			throw new Exception("Transaction require more then two write style sql");
 		}
 		
 		$sql = 'set autocommit=0';
