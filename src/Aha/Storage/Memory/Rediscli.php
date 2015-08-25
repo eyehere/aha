@@ -163,7 +163,6 @@ class Rediscli extends Client {
 	 * @return type
 	 */
 	public function onReceive(\swoole_client $client, $data) {
-		$success = true;
         if ($this->_wait_recv) {
             return $this->_waitReceive($data);
         }
@@ -172,13 +171,12 @@ class Rediscli extends Client {
         $type = $lines[0][0];
 		
         if ($type == '-') {
-            $success = false;
             $result = substr($lines[0], 1);
 			echo "Rediscli parse error:[data]$data" . PHP_EOL;
-			return $this->_notify(false);
+			return $this->_notify(false, $result);
         } elseif ($type == '+') {
             $result = substr($lines[0], 1);
-			return $this->_notify($result);
+			return $this->_notify($result);	
         } elseif ($type == '$') {//只有一行数据
             return $this->_parseLine($data);
         } elseif ($type == '*') {//多行数据
@@ -187,8 +185,9 @@ class Rediscli extends Client {
             $result = intval(substr($lines[0], 1));
             return $this->_notify($result);
         } else {
-            echo "Response is not a redis result. String:\n$data\n";
-            return;
+            $message = "Response is not a redis result. String:$data";
+			echo $message . PHP_EOL;
+			return $this->_notify(false, $message);
         }
 	}
 	
@@ -206,7 +205,7 @@ class Rediscli extends Client {
 			$this->_multi_line = false;
 			return;
 		}
-		$result = $lines[1];
+		$result = rtrim($lines[1], "\r\n");
 		return $this->_notify($result);
 	}
 	
@@ -216,12 +215,18 @@ class Rediscli extends Client {
 	 * @return type
 	 */
 	protected function _parseMultiLine($data) {
-		$lines = explode("\r\n", $data, 2);
-		$dataLineNum = intval(substr($lines[0], 1));
-		$dataLines	 = explode("\r\n", $lines[1]);
-		$requireLineLen = $dataLineNum * 2 - substr_count($data, "$-1\r\n");
-		$linesCnt = count($dataLines) - 1;
-		if ($linesCnt == $requireLineLen) {
+		
+		$dataLines = array();
+		$requireLineLen=0;
+		$linesCnt =0;
+		
+		if ( $this->_multi_line ) {
+			$dataLines	 = explode("\r\n", $this->_buffer);
+			$requireLineLen = $this->_multi_line * 2 - substr_count($this->_buffer, "$-1\r\n");
+			$linesCnt = count($dataLines) - 1;
+		}
+		
+		if ( $this->_multi_line && $linesCnt == $requireLineLen) {
 			$result = array();
 			$index = 0;
 			for ($i = 0; $i < $linesCnt; $i++) {
@@ -240,7 +245,10 @@ class Rediscli extends Client {
 			}
 			return $this->_notify($result);
 		}
-		//数据不足，需要缓存
+		
+		//数据不足，需要继续等待
+		$lines = explode("\r\n", $data, 2);
+		$dataLineNum = intval(substr($lines[0], 1));
 		$this->_multi_line = $dataLineNum;
 		$this->_buffer = $lines[1];
 		$this->_wait_recv = true;
@@ -255,9 +263,9 @@ class Rediscli extends Client {
 	protected function _waitReceive($data) {
 		$this->_buffer .= $data;
 		if ($this->_multi_line) {
-			$requireLineLen = $this->_multi_line * 2 + 1 - substr_count($data, "$-1\r\n");
+			$requireLineLen = $this->_multi_line * 2 + 1 - substr_count($this->_buffer, "$-1\r\n");
 			if (substr_count($this->buffer, "\r\n") - 1 == $requireLineLen) {
-				goto parse_multi_line;
+				return $this->_parseMultiLine($data);
 			}
 		} else {
 			if (strlen($this->_buffer) >= $this->_wait_recv) {
@@ -272,13 +280,13 @@ class Rediscli extends Client {
 	 * @brief 通知上层redis指令的执行结果
 	 * @param type $result
 	 */
-	protected function _notify($result) {
+	protected function _notify($result, $error=null) {
 		$callback  = $this->_callback;
 		$arguments = $this->_arguments;
 		$this->_free();
 		
 		try {
-			call_user_func($callback, $result, $arguments['callback'],$this);
+			call_user_func($callback, $result, $arguments['callback'],$this, $error);
 		} catch (\Exception $ex) {
 			echo "Redis onReceive notify callback![exception]" . $ex->getMessage() . PHP_EOL;
 		}

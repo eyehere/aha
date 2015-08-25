@@ -142,8 +142,9 @@ class Redis {
 		}
 		//控制队列的堆积
 		if ( count($this->_poolQueue) >= $this->_poolSize ) {
-			echo "Redis Warning: poolQueue Size is beyond poolSize ![CMD] {$cmd}" . PHP_EOL;
-			$this->_queryFailedNotify($callback);
+			$message = 'Redis Warning: poolQueue Size is beyond poolSize';
+			echo "$message ![CMD] {$cmd}" . PHP_EOL;
+			$this->_queryFailedNotify($callback, null, $message);
 			return false;
 		}
 		$this->_poolQueue[] = compact('cmd','callback','fields');
@@ -169,12 +170,12 @@ class Redis {
 	 * @param type $callback
 	 * @param type $redisCli
 	 */
-	protected function _queryFailedNotify($callback, $redisCli = null) {
+	protected function _queryFailedNotify($callback, $redisCli = null, $message=null) {
 		if ( null !== $redisCli && $redisCli->isConnected() ) {
 			$redisCli->close();
 		}
 		try {
-			call_user_func($callback, false);
+			call_user_func($callback, false, $message);
 		} catch (\Exception $e) {
 			echo "Redis _queryFailedNotify Exception: {$e->getMessage()}" . PHP_EOL;
 		}
@@ -185,9 +186,9 @@ class Redis {
 	 * @param type $result
 	 * @param type $callback
 	 */
-	public function response($result, $callback, \Aha\Storage\Memory\Rediscli $redisCli) {
+	public function response($result, $callback, \Aha\Storage\Memory\Rediscli $redisCli, $error = null) {
 		try {
-			call_user_func($callback, $result);
+			call_user_func($callback, $result, $error);
 		} catch (\Exception $e) {
 			echo "Redis Response Callback Exception: {$e->getMessage()}" . PHP_EOL;
 		}
