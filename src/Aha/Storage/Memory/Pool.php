@@ -25,16 +25,30 @@ class Pool {
 	protected static $_redisPool	= array();
 	
 	/**
+	 * @brief redis client gc
+	 * @var type 
+	 */
+	protected static $_gcPool = array();
+	
+	/**
 	 * @brief 获取rdis连接 方便管理
 	 * @param type $instanceName
 	 * @param type $redisConf
 	 * @return type
 	 */
 	public static function getConnection($instanceName, $conf = array()) {
-		if ( !isset(self::$_dbPool[$instanceName]) ) {
-			self::$_dbPool[$instanceName] = new \Aha\Storage\Memory\Redis($conf);
+		if ( !isset(self::$_redisPool[$instanceName]) ) {
+			self::$_redisPool[$instanceName] = new \Aha\Storage\Memory\Redis($conf);
 		}
-		return self::$_dbPool[$instanceName];
+		return self::$_redisPool[$instanceName];
+	}
+	
+	/**
+	 * @brief redis client gc
+	 * @param \Aha\Storage\Memory\Rediscli $redisCli
+	 */
+	public static function redisCliGc(\Aha\Storage\Memory\Rediscli $redisCli) {
+		self::$_gcPool[] = $redisCli;
 	}
 	
 }

@@ -180,6 +180,15 @@ abstract class Client {
 	}
 	
 	/**
+	 * 获取client
+	 * @return type
+	 */
+	public function getClient() {
+		return $this->_objClient;
+	}
+
+
+	/**
 	 * @brief 设置callback
 	 * @param type $callback
 	 * @return \Aha\Network\Client
