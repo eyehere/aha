@@ -37,6 +37,7 @@ class Pool {
 	 * @return type
 	 */
 	public static function getConnection($instanceName, $conf = array()) {
+		self::freeRedisCli();
 		if ( !isset(self::$_redisPool[$instanceName]) ) {
 			self::$_redisPool[$instanceName] = new \Aha\Storage\Memory\Redis($conf);
 		}
@@ -49,6 +50,20 @@ class Pool {
 	 */
 	public static function redisCliGc(\Aha\Storage\Memory\Rediscli $redisCli) {
 		self::$_gcPool[] = $redisCli;
+	}
+	
+	/**
+	 * @brief 释放需要回收的redis对象
+	 * @return boolean
+	 */
+	public static function freeRedisCli() {
+		if ( empty(self::$_gcPool) ) {
+			return true;
+		}
+		foreach (self::$_gcPool as $key=>$obj) {
+			unset(self::$_gcPool[$key]);
+		}
+		return;
 	}
 	
 }

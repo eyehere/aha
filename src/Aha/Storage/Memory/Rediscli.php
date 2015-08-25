@@ -25,9 +25,22 @@ class Rediscli extends Client {
 	 */
 	protected $_arguments = null;
 	
+	/**
+	 * @brief 相应原始包
+	 * @var type 
+	 */
 	protected $_buffer = '';
 	
+	/**
+	 * @brief 原始数据包等待标识
+	 * @var type 
+	 */
     protected $_wait_recv = false;
+	
+	/**
+	 * @brief 多行相应数据标识 有多行数据的时候存数据的长度
+	 * @var type 
+	 */
     protected $_multi_line = false;
 
 	/**
@@ -39,6 +52,7 @@ class Rediscli extends Client {
 		$host	= $conf['host'];
 		$port	= $conf['port'];
 		$timeout= $conf['timeout'];
+		//TODO |SWOOLE_KEEP
 		$client = new \swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
 		parent::__construct($client, $host, $port, $timeout);
 		$this->_initConfig();
@@ -85,7 +99,7 @@ class Rediscli extends Client {
 			return;
 		}
 		//如果有等待连接发送的数据
-		$this->_send($client);
+		$this->_send($this->_package);
 	}
 	
 	/**
@@ -93,11 +107,14 @@ class Rediscli extends Client {
 	 * @param type $client
 	 * @return boolean
 	 */
-	protected function _send($client) {
+	protected function _send($client, $bolSendErrorClose = false) {
 		if ( ! $client->send($this->_package) ) {//发送失败的回调和资源回收
 			$error = array(
 				'errno'		=> \Aha\Network\Client::ERR_SEND_FAILED, 
-				'errmsg'	=> array('errCode'=>$client->errCode, 'error'=>  socket_strerror($client->errCode)),
+				'errmsg'	=> array(
+									'errCode'=>$client->errCode, 
+									'error'=>  socket_strerror($client->errCode)
+								),
 				'package'	=> $this->_package
 			);
 			echo "Redis onConnect send failed![error]" . serialize($error) . PHP_EOL;
@@ -105,15 +122,21 @@ class Rediscli extends Client {
 			$callback  = $this->_callback;
 			$arguments = $this->_arguments;
 			$this->_free();
-		
+			
+			//从连接池去处的连接 可能server已经关闭连接导致的发送错误需要关闭连接
+			//对于刚建立的连接 只要连接成功了 发送失败的情况是可以复用的
+			if ( $bolSendErrorClose && $client->isConnected() ) {
+				$client->close();
+			}
+			
 			try {
-			call_user_func($callback, false, $arguments['callback'],$this);
+				call_user_func($callback, false, $arguments['callback'],$this,'Redis send error');
 			} catch (\Exception $ex) {
 				echo "Redis onConnect send callback failed![exception]" . $ex->getMessage() . PHP_EOL;
 			}
-			$this->_free();
 			return false;
 		}
+		//TODO 读写超时定时器
 		/*
 		if ( floatval($this->_timeout) > 0 ) {
 			$response = array(
@@ -136,7 +159,10 @@ class Rediscli extends Client {
 	public function onError(\swoole_client $client) {
 		$error = array(
 			'errno'		=> \Aha\Network\Client::ERR_UNEXPECT, 
-			'errmsg'	=> array('errCode'=>$client->errCode, 'error'=>  socket_strerror($client->errCode)),
+			'errmsg'	=> array(
+								'errCode'=>$client->errCode, 
+								'error'=>  socket_strerror($client->errCode)
+							),
 			'package'	=> $this->_package
 		);
 		echo "Redis onError![error]" . serialize($error) . PHP_EOL;
@@ -145,15 +171,16 @@ class Rediscli extends Client {
 		$arguments = $this->_arguments;
 		$this->_free();
 		
-		try {
-			call_user_func($callback, false, $arguments['callback'],$this);
-		} catch (\Exception $ex) {
-			echo "Redis onError callback![exception]" . $ex->getMessage() . PHP_EOL;
-		}
-
 		if ( $client->isConnected() ) {
 			$client->close();
 		}
+		
+		try {
+			call_user_func($callback, false, $arguments['callback'],$this,'Redis onError');
+		} catch (\Exception $ex) {
+			echo "Redis onError callback![exception]" . $ex->getMessage() . PHP_EOL;
+		}
+		
 	}
 
 	/**
@@ -236,7 +263,7 @@ class Rediscli extends Client {
 					$value = $dataLines[$i + 1];
 					$i++;
 				}
-				if ($this->_arguments['fields']) {
+				if ( !empty($this->_arguments['fields']) ) {
 					$result[$this->_arguments['fields'][$index]] = $value;
 				} else {
 					$result[] = $value;
@@ -263,8 +290,8 @@ class Rediscli extends Client {
 	protected function _waitReceive($data) {
 		$this->_buffer .= $data;
 		if ($this->_multi_line) {
-			$requireLineLen = $this->_multi_line * 2 + 1 - substr_count($this->_buffer, "$-1\r\n");
-			if (substr_count($this->buffer, "\r\n") - 1 == $requireLineLen) {
+			$requireLineLen = $this->_multi_line * 2 - substr_count($this->_buffer, "$-1\r\n");
+			if (substr_count($this->buffer, "\r\n") == $requireLineLen) {
 				return $this->_parseMultiLine($data);
 			}
 		} else {
@@ -301,12 +328,35 @@ class Rediscli extends Client {
 		if ( ! $this->_objClient->isConnected() ) {
 			$this->_objClient->connect($this->_host, $this->_port, $this->_connectTimeout);
 		} else {
-			$this->_send($this->_objClient);
+			$this->_send($this->_objClient, true);//连接池取出的连接 send失败就关闭了吧
 		}
 		
 		return $this;
 	}
 	
+	/**
+	 * @brief redis连接池close事件
+	 * @param \swoole_client $cli
+	 * @return type
+	 */
+	public function onClose(\swoole_client $cli) {
+        if ( !empty($this->_package) ) {
+			echo "Redis Warning: Maybe receive a Close event , "
+					. "such as Redis server close the socket !" . PHP_EOL;
+			return;
+        }
+		
+		$callback  = $this->_callback;
+		$arguments = $this->_arguments;
+		$this->_free();
+		
+		try {
+			call_user_func($callback, false, $arguments['callback'],$this, 'Redis closed timeout');
+		} catch (\Exception $ex) {
+			echo "Redis Closed notify callback![exception]" . $ex->getMessage() . PHP_EOL;
+		}
+    }
+
 	/**
 	 * @brief 对象资源释放
 	 */
