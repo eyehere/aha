@@ -19,17 +19,38 @@ namespace Aha\Client;
 class Pool {
 	
 	/**
-	 * @brief 全局的client poll,主要用于触发GC
+	 * @brief httpclient keep-alive 长连接连接池
 	 * @var hashTable 
 	 */
 	protected static $_httpPools = array();
 	
 	/**
-	 * 释放 http_client
+	 * @brief httpclient keep-alive 长连接连接池连接数
+	 * @var type 
+	 */
+	protected static $_httpConnNum	=	array();
+	
+	/**
+	 * @brief httpclient keep-alive 长连接连接池大小
+	 * @var type 
+	 */
+	protected static $_httpPoolSize	= array();
+
+	/**
+	 * @brief 全局的client poll,主要用于触发GC
+	 * @var hashTable 
+	 */
+	protected static $_gcPools = array();
+
+	/**
+	 * 释放 http_client keep-alive连接进入连接池
 	 * @param \Aha\Network\Client $client
 	 */
-	public static function freeHttp(\Aha\Network\Client $client) {
-		self::$_httpPools[] = $client;
+	public static function freeHttp($poolName,\Aha\Network\Client $client) {
+		if ( !isset(self::$_httpPools[$poolName]) ) {
+			self::$_httpPools[$poolName] = array();
+		}
+		self::$_httpPools[$poolName][] = $client;
 	}
 	
 	/**
@@ -40,13 +61,51 @@ class Pool {
 	 * @param \float $connectTimeout
 	 * @return \Aha\Client\Http
 	 */
-	public static function getHttpClient( $method, $url, $timeout = 1, $connectTimeout = 0.05) {
-		if ( !empty(self::$_httpPools) ) {
-			foreach (self::$_httpPools as $key=>$client) {
-				unset(self::$_httpPools[$key]);
+	public static function getHttpClient( $method, $url, $poolSize, $timeout = 1, $connectTimeout = 0.05) {
+		//gc
+		if ( !empty(self::$_gcPools) ) {
+			foreach (self::$_gcPools as $key=>$client) {
+				unset(self::$_gcPools[$key], $client);
 			}
 		}
-		return new \Aha\Client\Http($method, $url, $timeout, $connectTimeout);
+		//优先从连接池中获取
+		$poolName = parse_url($url, PHP_URL_HOST).':'.parse_url($url, PHP_URL_PORT);
+		if ( empty(self::$_httpPools[$poolName]) ) {
+			$httpCli = array_shift(self::$_httpPools[$poolName]);
+			return self::_decorateHttpClient($httpCli, $method, $url);
+		}
+		//如果当前连接数大于连接池大小 跑异常
+		//http client 不做queue是因为http请求每个连接请求占用的时间相对比较长，应该控制好相对的连接池大小
+		//queue可能会是相应时间更长 系统恶化
+		self::$_httpPoolSize[$poolName] = $poolSize;
+		if ( self::$_httpConnNum[$poolName] >= self::$_httpPoolSize[$poolName] ) {
+			throw new \Exception("HttpClient of $poolName is beyond poolSize![$poolSize]");
+		}
+		
+		self::$_httpConnNum[$poolName]++;
+		$httpCli = new \Aha\Client\Http($method, $url, $timeout, $connectTimeout);
+		return self::_decorateHttpClient($httpCli, $method, $url);
+	}
+	
+	/**
+	 * @brief 初始化http client
+	 * @param type $httpCli
+	 * @param type $method
+	 * @param type $url
+	 * @return type
+	 */
+	protected static function _decorateHttpClient($httpCli, $method, $url) {
+		$httpCli->setMethod($method)->setUrl($url)->init();
+		return $httpCli;
+	}
+
+	/**
+	 * 释放 http_client gc
+	 * @param \Aha\Network\Client $client
+	 */
+	public static function gcHttp($poolName,\Aha\Network\Client $client) {
+		self::$_httpConnNum[$poolName]++;
+		self::$_gcPools[] = $client;
 	}
 	
 }

@@ -61,7 +61,7 @@ class Pool {
 			return true;
 		}
 		foreach (self::$_gcPool as $key=>$obj) {
-			unset(self::$_gcPool[$key]);
+			unset(self::$_gcPool[$key],$obj);
 		}
 		return;
 	}

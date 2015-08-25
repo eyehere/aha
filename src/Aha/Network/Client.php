@@ -97,6 +97,18 @@ abstract class Client {
 	 * @param \swoole_client $client
 	 */
 	public function onConnect(\swoole_client $client) {
+		if ( empty($this->_package) ) {
+			return;
+		}
+		$this->_send($client);
+	}
+	
+	/**
+	 * @brief 在连接回调中如果数据还没有被发送 则发送数据
+	 * @param \swoole_client $client
+	 * @return boolean
+	 */
+	protected function _send(\swoole_client $client) {
 		if ( ! $client->send($this->_package) ) {
 			$response = array(
 				'errno'		=> \Aha\Network\Client::ERR_SEND_FAILED, 
@@ -105,11 +117,24 @@ abstract class Client {
 				'const'		=> microtime(true) - $this->_const,
 				'data'		=> array()
 			);
-			call_user_func($this->_callback, $response);
-			$client->close();
+			
+			$client->close();//发送失败的情况 可能长连接失效或者对方访问点故障，关闭连接释放资源
+			
+			$callback  = $this->_callback;
+			$this->_free();
+			
+			try {
+				call_user_func($callback, $response);
+			} catch (\Exception $ex) {
+				echo "HttpClient onConnect send callback failed![exception]" . $ex->getMessage() . PHP_EOL;
+			}
+			return false;
+		} else {
+			$this->_package = null;
 		}
 	}
-	
+
+
 	/**
 	 * @brief 收到数据时候的回调
 	 * @param \swoole_client $client
@@ -148,6 +173,7 @@ abstract class Client {
 	 * @param \swoole_client $client
 	 */
 	public function onClose(\swoole_client $client) {
+		$this->_objClient = null;
 		$this->_free();
 	}
 	//================client callback END======================================
