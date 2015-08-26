@@ -21,28 +21,16 @@ use \Aha\Client\Multi;
 class Http extends Action {
 	
 	public function excute() {
-		/*
-		$http = new Http('GET', 'http://www.qq.com/');
-		$http->setRequestId('truncked');
-		$http->setCallback( array($this, 'output') );
-		$http->loop();
-		 */
-		/*
-		$http = new Http('GET', 'http://10.10.8.172:9601/service/monitor/stats');
-		$http->setRequestId('length');
-		$http->setCallback( array($this, 'output') );
-		$http->loop();
-		 */
-		/*
-		$http1 = new Http('GET', 'http://www.qq.com/', 0.5);
-		$http1->setRequestId('trunked');
-		$http2 = new Http('GET', 'http://www.jd.com/', 0.5);
-		$http2->setRequestId('length');
-		$mutli = new Multi();
-		$mutli->register($http1);
-		$mutli->register($http2);
-		$mutli->loop(array($this,'output'));
-		*/
+		
+//		$http1 = \Aha\Client\Pool::getHttpClient('GET', 'http://www.qq.com/');
+//		$http1->setRequestId('trunked');
+//		$http2 = \Aha\Client\Pool::getHttpClient('GET', 'http://www.jd.com/');
+//		$http2->setRequestId('length');
+//		$mutli = new Multi();
+//		$mutli->register($http1);
+//		$mutli->register($http2);
+//		$mutli->loop(array($this,'output'));
+		
 		$http = \Aha\Client\Pool::getHttpClient('GET', 'http://www.jd.com/');
 		$http->setRequestId('contentLength');
 		$http->setCallback( array($this, 'output') );
@@ -58,14 +46,12 @@ class Http extends Action {
 		} else {
 			$response->end(json_encode($data));
 		}
-		/*
-		if ( isset($data['data']['length']['data']['body']) ) {
-			$response->end($data['data']['length']['data']['body']);
-		} else {
-			$response->end(json_encode($data['data']['length']));
-		}
-		*/
-		//$response->end($data['data']['trunked']['data']['body']);
+		
+//		if ( isset($data['data']['length']['data']['body']) ) {
+//			$response->end($data['data']['length']['data']['body']);
+//		} else {
+//			$response->end(json_encode($data['data']['length']));
+//		}
 		
 //		if ( isset($data['data']['trunked']['data']['body']) ) {
 //			$response->end($data['data']['trunked']['data']['body']);

@@ -76,7 +76,7 @@ class Pool {
 			$port = 443;
 		}
 		$poolName = $host . ':' . $port;
-		var_dump(count(self::$_httpPools[$poolName]));
+		
 		if ( !empty(self::$_httpPools[$poolName]) ) {
 			$httpCli = array_shift(self::$_httpPools[$poolName]);
 			return self::_decorateHttpClient($httpCli, $method, $url);
