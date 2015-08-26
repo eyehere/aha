@@ -99,7 +99,7 @@ class Rediscli extends Client {
 			return;
 		}
 		//如果有等待连接发送的数据
-		$this->_send($this->_package);
+		$this->_sendReq($client, $this->_package);
 	}
 	
 	/**
@@ -107,7 +107,7 @@ class Rediscli extends Client {
 	 * @param type $client
 	 * @return boolean
 	 */
-	protected function _send($client, $bolSendErrorClose = false) {
+	protected function _sendReq($client, $bolSendErrorClose = false) {
 		if ( ! $client->send($this->_package) ) {//发送失败的回调和资源回收
 			$error = array(
 				'errno'		=> \Aha\Network\Client::ERR_SEND_FAILED, 
@@ -247,13 +247,18 @@ class Rediscli extends Client {
 		$requireLineLen=0;
 		$linesCnt =0;
 		
+		$lines = explode("\r\n", $data, 2);
+		$dataLineNum = intval(substr($lines[0], 1));
+		$this->_multi_line = $dataLineNum;
+		$this->_buffer = $lines[1];
+		
 		if ( $this->_multi_line ) {
 			$dataLines	 = explode("\r\n", $this->_buffer);
 			$requireLineLen = $this->_multi_line * 2 - substr_count($this->_buffer, "$-1\r\n");
 			$linesCnt = count($dataLines) - 1;
 		}
 		
-		if ( $this->_multi_line && $linesCnt == $requireLineLen) {
+		if ( /*$this->_multi_line && $linesCnt > 0 &&*/ $linesCnt == $requireLineLen) {
 			$result = array();
 			$index = 0;
 			for ($i = 0; $i < $linesCnt; $i++) {
@@ -271,14 +276,10 @@ class Rediscli extends Client {
 				$index++;
 			}
 			return $this->_notify($result);
+		} else {
+			$this->_wait_recv = true;
 		}
 		
-		//数据不足，需要继续等待
-		$lines = explode("\r\n", $data, 2);
-		$dataLineNum = intval(substr($lines[0], 1));
-		$this->_multi_line = $dataLineNum;
-		$this->_buffer = $lines[1];
-		$this->_wait_recv = true;
 		return;
 	}
 
@@ -325,10 +326,10 @@ class Rediscli extends Client {
 	 */
 	public function loop() {
 		$this->_const = microtime(true);
-		if ( ! $this->_objClient->isConnected() ) {
+		if ( !$this->_objClient->sock || ! $this->_objClient->isConnected() ) {
 			$this->_objClient->connect($this->_host, $this->_port, $this->_connectTimeout);
 		} else {
-			$this->_send($this->_objClient, true);//连接池取出的连接 send失败就关闭了吧
+			$this->_sendReq($this->_objClient, true);//连接池取出的连接 send失败就关闭了吧
 		}
 		
 		return $this;

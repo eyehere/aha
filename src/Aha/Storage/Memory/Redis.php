@@ -92,7 +92,7 @@ class Redis {
             $lines[] = $k;
             $lines[] = $v;
         }
-        $cmd = $this->parseRequest($lines);
+        $cmd = $this->_buildRequest($lines);
        return $this->_query($cmd, $callback);
     }
 	
@@ -104,9 +104,10 @@ class Redis {
 	 * @return type
 	 */
 	public function hmget($key, array $value, $callback) {
+		$fields = $value;
         array_unshift($value, "hmget", $key);
-        $cmd = $this->parseRequest($value);
-        return $this->_query($cmd, $callback, $value);
+        $cmd = $this->_buildRequest($value);
+        return $this->_query($cmd, $callback, $fields);
     }
 
 	/**
@@ -136,7 +137,7 @@ class Redis {
 		}
 		//连接池动态增长
 		if ( $this->_connectionNum < $this->_poolSize ) {
-			$this->_idlePool[] = new \Aha\Storage\Memory\Redis($this->_conf);
+			$this->_idlePool[] = new \Aha\Storage\Memory\Rediscli($this->_conf);
 			$this->_connectionNum++;
 			return $this->_doQuery($cmd, $callback, $fields);
 		}
