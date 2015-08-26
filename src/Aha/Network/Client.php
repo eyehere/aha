@@ -164,7 +164,7 @@ abstract class Client {
 			call_user_func($this->_callback, $response);
 		}
 		
-		if ( $client->isConnected() ) {
+		if ( $client->sock && $client->isConnected() ) {
 			$client->close();
 		} else {
 			$this->_free();

@@ -50,7 +50,6 @@ class Udp extends Client {
 	 * @param type $data
 	 */
 	public function onReceive(\swoole_client $client, $data) {
-		$client->close();
 		if ( null !== $this->_timer ) {
 			//\Aha\Network\Timer::del($this->_timer);
 		}
@@ -61,15 +60,67 @@ class Udp extends Client {
 			'const'		=> microtime(true) - $this->_const,
 			'data'		=> $data
 		);
-		call_user_func($this->_callback, $response);
+		
+		try {
+			call_user_func($this->_callback, $response);
+		} catch (\Exception $ex) {
+			echo "UdpClient callback failed![exception]" . $ex->getMessage() . PHP_EOL;
+		}
+		
+		$this->_connectionManager();
+	}
+	
+	/**
+	 * @brief udp client connection manager
+	 */
+	protected function _connectionManager() {
+		//把对应的域名和端口对应的udp长连接对象放入对象连接池
+		$key = $this->_host . ':' . $this->_port;
+		$this->_free();
+		\Aha\Client\Pool::freeUdp($key, $this);
+	}
+	
+		/**
+	 * @brief 连接关闭的时候吧雷放回连接回收池
+	 * @param \swoole_client $client
+	 */
+	public function onClose(\swoole_client $client) {
+		parent::onClose($client);
+		$poolName = $this->_host.':'.$this->_port;
+		\Aha\Client\Pool::gcUdp($poolName, $this);
+	}
+	
+	/**
+	 * @brief 发生错误的时候 吧连接放回gc 出发close事件可能会gc重复 但是无所谓
+	 * @param \swoole_client $client
+	 */
+	public function onError(\swoole_client $client) {
+		parent::onError($client);
+		$poolName = $this->_host.':'.$this->_port;
+		\Aha\Client\Pool::gcUdp($poolName, $this);
 	}
 	
 	/**
 	 * @brief 对外请求开始loop
 	 */
 	public function loop() {
-		parent::loop();
-		$this->_objClient->connect($this->_host, $this->_port, $this->_connectTimeout);
+		if ( $this->_objClient->sock &&  $this->_objClient->isConnected() ) {
+			$this->_send($this->_objClient);//连接池取出的连接 send失败就关闭了吧
+		} else {
+			$this->_objClient->connect($this->_host, $this->_port, $this->_connectTimeout);
+		}
+		return parent::loop();
+	}
+	
+	/**
+	 * @brief 资源释放
+	 */
+	protected function _free() {
+		$this->_requestId	= null;
+		$this->_package	= null;
+		$this->_timer = null;
+		
+		$this->_callback = null;//重要 释放了callback以后才能释放MVC
 	}
 
 }

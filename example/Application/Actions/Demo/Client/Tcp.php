@@ -16,12 +16,11 @@
 */
 namespace Application\Actions\Demo\Client;
 use \Aha\Mvc\Action;
-use \Aha\Client\Tcp;
 
 class Tcp extends Action {
 	
 	public function excute() {
-		$tcpCli = new Tcp('10.10.8.172','9602');
+		$tcpCli = \Aha\Client\Pool::getTcpClient('10.10.8.172','9602');
 		$tcpCli->setRequestId('TcpRequest');
 		$tcpCli->setCallback( array($this, 'output') );
 		$arrDara = array(

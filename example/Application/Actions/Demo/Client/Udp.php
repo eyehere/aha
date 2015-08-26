@@ -16,12 +16,11 @@
 */
 namespace Application\Actions\Demo\Client;
 use \Aha\Mvc\Action;
-use \Aha\Client\Udp;
 
 class Udp extends Action {
 	
 	public function excute() {
-		$tcpCli = new Udp('10.10.8.172','9603');
+		$tcpCli = \Aha\Client\Pool::getUdpClient('10.10.8.172','9603');
 		$tcpCli->setRequestId('UdpRequest');
 		$tcpCli->setCallback( array($this, 'output') );
 		$arrDara = array(
