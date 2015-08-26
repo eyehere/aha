@@ -126,7 +126,7 @@ abstract class Client {
 			try {
 				call_user_func($callback, $response);
 			} catch (\Exception $ex) {
-				echo "HttpClient onConnect send callback failed![exception]" . $ex->getMessage() . PHP_EOL;
+				echo "Client onConnect send callback failed![exception]" . $ex->getMessage() . PHP_EOL;
 			}
 			return false;
 		} else {
@@ -161,7 +161,11 @@ abstract class Client {
 		);
 		
 		if (is_callable($this->_callback) ) {
-			call_user_func($this->_callback, $response);
+			try {
+				call_user_func($this->_callback, $response);
+			} catch (\Exception $ex) {
+				echo "Client onConnect send callback failed![exception]" . $ex->getMessage() . PHP_EOL;
+			}
 		}
 		
 		if ( $client->sock && $client->isConnected() ) {
