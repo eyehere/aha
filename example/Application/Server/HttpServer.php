@@ -89,6 +89,7 @@ class HttpServer extends Http {
 					$response->status(500);
 					break;
 			}
+			echo $message;
 			$response->end($message);
 		}
 	}

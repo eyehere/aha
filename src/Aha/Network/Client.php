@@ -160,7 +160,10 @@ abstract class Client {
 			'data'		=> array()
 		);
 		
-		call_user_func($this->_callback, $response);
+		if (is_callable($this->_callback) ) {
+			call_user_func($this->_callback, $response);
+		}
+		
 		if ( $client->isConnected() ) {
 			$client->close();
 		} else {

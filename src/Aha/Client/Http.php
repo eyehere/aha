@@ -306,6 +306,7 @@ class Http extends Client {
 			$this->_objClient = null;
 			return;
 		}
+		
 		//把对应的域名和端口对应的http长连接对象放入对象连接池
 		$key = $this->_host . ':' . $this->_port;
 		$this->_free();
@@ -346,7 +347,7 @@ class Http extends Client {
 	 */
 	public function loop() {
 		$this->_buildRequest();
-		if ( $this->_objClient->isConnected() ) {
+		if ( $this->_objClient->sock &&  $this->_objClient->isConnected() ) {
 			$this->_send($this->_objClient);//连接池取出的连接 send失败就关闭了吧
 			return parent::loop();
 		}

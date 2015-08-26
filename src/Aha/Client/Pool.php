@@ -61,7 +61,7 @@ class Pool {
 	 * @param \float $connectTimeout
 	 * @return \Aha\Client\Http
 	 */
-	public static function getHttpClient( $method, $url, $poolSize, $timeout = 1, $connectTimeout = 0.05) {
+	public static function getHttpClient( $method, $url, $poolSize = 500, $timeout = 1, $connectTimeout = 0.05) {
 		//gc
 		if ( !empty(self::$_gcPools) ) {
 			foreach (self::$_gcPools as $key=>$client) {
@@ -69,8 +69,15 @@ class Pool {
 			}
 		}
 		//优先从连接池中获取
-		$poolName = parse_url($url, PHP_URL_HOST).':'.parse_url($url, PHP_URL_PORT);
-		if ( empty(self::$_httpPools[$poolName]) ) {
+		$arrUrl	= parse_url($url);
+		$host	= $arrUrl['host'];
+		$port	= isset($arrUrl['port']) ? $arrUrl['port'] : 80;
+		if ( $arrUrl['scheme'] === 'https' ) {
+			$port = 443;
+		}
+		$poolName = $host . ':' . $port;
+		var_dump(count(self::$_httpPools[$poolName]));
+		if ( !empty(self::$_httpPools[$poolName]) ) {
 			$httpCli = array_shift(self::$_httpPools[$poolName]);
 			return self::_decorateHttpClient($httpCli, $method, $url);
 		}
@@ -78,6 +85,10 @@ class Pool {
 		//http client 不做queue是因为http请求每个连接请求占用的时间相对比较长，应该控制好相对的连接池大小
 		//queue可能会是相应时间更长 系统恶化
 		self::$_httpPoolSize[$poolName] = $poolSize;
+		if ( !isset(self::$_httpConnNum[$poolName]) ) {
+			self::$_httpConnNum[$poolName] = 0;
+		}
+		
 		if ( self::$_httpConnNum[$poolName] >= self::$_httpPoolSize[$poolName] ) {
 			throw new \Exception("HttpClient of $poolName is beyond poolSize![$poolSize]");
 		}

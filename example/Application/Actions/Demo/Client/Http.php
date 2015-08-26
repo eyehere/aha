@@ -44,7 +44,6 @@ class Http extends Action {
 		$mutli->loop(array($this,'output'));
 		*/
 		$http = \Aha\Client\Pool::getHttpClient('GET', 'http://www.jd.com/');
-		//$http = new Http('GET', 'http://www.jd.com/');
 		$http->setRequestId('contentLength');
 		$http->setCallback( array($this, 'output') );
 		$http->loop();
@@ -76,7 +75,7 @@ class Http extends Action {
 	}
 	
 	public function __destruct() {
-		var_dump(__METHOD__);
+		//var_dump(__METHOD__);
 	}
 	
 } 
