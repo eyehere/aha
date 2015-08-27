@@ -381,3 +381,5 @@ when use redis client in your aplication,you can written your cmd in models.
 	
 	} 
 
+## performance ##
+![Aha框架的性能测试数据(仅供参考)](http://i.imgur.com/YaBHyHi.png)
