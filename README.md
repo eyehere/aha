@@ -2,19 +2,23 @@
 
 ----------
 
-Aha is a framework base on swoole,written in php.
+Aha is a high performance pure asynchronous network framework base on swoole,written in php.
 
 # Road map #
 
 ----------
 
 1. v1.0.0
-	- server/client/mvc/storage support;
+	- Mvc asynchronous
+	- Network asynchronous server(http、tcp、udp)
+	- Network asynchronous client(http、tcp、udp、multi、pool)
+	- asynchronous storage(mysql、transaction、redis、pool);
+	- asynchronous logger
 2. v1.+.+
 	- more third party clients such as memcache/beanstalkd support;
-	- php daemon process support;
-	- coroutine for multi task schedule for deamon support;
-3. **I will rewrite Aha framework in C because of:**
+	- php daemon multi concurrent process support;
+	- coroutine of multi task schedule for deamon support;
+3. **I will rewrite Aha framework in C because of these reasons below:**
 	- **Lower CPU occupancy;**
 	- **Faster memory recovery cycles;**
 	- **Just install a php extension named Aha** 
@@ -23,36 +27,36 @@ Aha is a framework base on swoole,written in php.
 
 ----------
 
-1. HTTP/TCP/UDP server support.Tt's easy to create a server application base on Aha;
+1. HTTP/TCP/UDP server support.Tt's easy to create a server application base on Aha framework;
 
-2. HTTP/TCP/UDP client pool.In this case,you can make your third part request more efficient because of the reasons:
+2. HTTP/TCP/UDP client pool.In this case,you can make your third part request more efficient because of the reasons below:
 
 	- reduced three times handshark when connect;
-	-  reduced four times handshark when close;
-	-   break through the limit of local port( if close immediately,the local port will wait 2MSL for reuse);
+	- reduced four times handshark when close;
+	- break through the limit of local port( if close immediately,the local port will wait 2MSL for reuse);
 
 3. multi clients concurrent support;
 
 4. MVC which contains loader,router,filter,dispatcher,action and config can use not only in http server,but also in tcp,udp server;
-	- loader:you can use it anywhere;
+	- loader:you can use it anywhere for classes autoload;
 	- router:recurive router depend on your router element and delemiter;
-	- filter:provided preRouter,postRouter,preDispatch,postDispatch for phase for your filer require,each pahse can redister more then one hook;
-	- dispatcher:it contains all elements which you needed when appication development from you action;
+	- filter:provided preRouter,postRouter,preDispatch,postDispatch phases for your filer requires,each pahse can register more then one hook;
+	- dispatcher:it contains all elements which you needed when appication development anywhere;
 	- action: your application actions must extend from this abstract class;
 	- config: it will load all config item on worker start;
 
-5. async log writter support;
+5. asynchronous log writter support;
 
-6. async redis client:
+6. asynchronous redis client:
 	- redis protocal support ;
 	- redis connection pool manager.
-	- It can also help you to put your redis request to queue when concurrent high;
+	- It can also help you to put your redis request to queue when concurrent higher then your system processing capability;
 
-7. async mysql query:
-	- async sql query;
-	- Asynchronous transaction.More important,the next transaction can build sql depend on the prev transaction result by Anonymous function; 
+7. asynchronous mysql query:
+	- asynchronous sql query;
+	- Asynchronous transaction.More important,the next transaction can build sql depend on the prev transaction result by anonymous function; 
 	- Asynchronous mysql connection manager;
-	- Asynchronous sql queue manager and trigger when concurrent high;
+	- Asynchronous sql queue manager and trigger when concurrent higher then your databases processing capability;;
 
 # Introduction #
 
@@ -192,8 +196,8 @@ when use mysql client in your aplication,you can written your query in models.
 	
 	}
 
-## mysql transaction ##
-when use mysql client in your aplication,you can written your query in models.	
+## mysql transaction chains ##
+when use mysql client in your aplication,you need written your query in db layer.	
 
 	namespace Application\Actions\Demo\Storage;
 	use \Aha\Mvc\Action;
@@ -213,11 +217,11 @@ when use mysql client in your aplication,you can written your query in models.
 					return $sql;
 				})
 				//->queue('friendsPlus','insert into friends set user_id=100000,friend_id=1000000')
-				->setCallback(array($this, 'QueryDbCallback'))
+				->setCallback(array($this, 'queryDbCallback'))
 				->execute();
 	}
 	
-	public function QueryDbCallback($result, $dbObj, $dbSock) {
+	public function queryDbCallback($result, $dbObj, $dbSock) {
 		$request	= $this->_objDispatcher->getRequest();
 		$response	= $this->_objDispatcher->getResponse();
 		
