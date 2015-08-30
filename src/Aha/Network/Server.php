@@ -121,7 +121,7 @@ abstract class Server {
 			'task_ipc_mode'		=>	3,//(1:使用unixsocket通信 2:消息队列 3:消息队列且争抢)
 			'task_max_request'	=>	2000,//task进程最大任务数
 			//'task_tmp_dir'	=>	'',//task数据临时目录
-			'dispatch_mode'		=>	2,//(1:轮询模式2:固定模式3:抢占模式4:IP分配5:UID分配)
+			'dispatch_mode'		=>	3,//(1:轮询模式2:固定模式3:抢占模式4:IP分配5:UID分配)
 			//'message_queue_key'=>	'',//(在ipc_mode=2或者task_ipc_mode=2时使用)
 			'backlog'			=>	128,//Listen队列的长度
 			'log_file'			=>	'./logs/Aha.log',//错误日志文件
