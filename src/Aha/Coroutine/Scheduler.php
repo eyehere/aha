@@ -81,8 +81,19 @@ class Scheduler {
 			
 			//系统调用 投递到任务池
 			if ( !is_null($ret) && $ret instanceof \Aha\Coroutine\SystemCall ) {
-				$this->schedule($ret);
+				try {
+					$ret($task, $this);
+				} catch (\Exception $ex) {
+					$task->setException($ex);
+					$this->schedule($task);
+				}
+				continue;
 			}
+			
+			//再次调用(有异步IO的时候再次调度会和task里的callback重复多次)
+			//if ( !$task->isFinished() ) {
+			//	$this->schedule($task);
+			//}
 		}
 	}
 	
