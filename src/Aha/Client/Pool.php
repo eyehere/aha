@@ -167,7 +167,12 @@ class Pool {
 	 * @param \Aha\Network\Client $client
 	 */
 	public static function gcHttp($poolName,\Aha\Network\Client $client) {
-		self::$_httpConnNum[$poolName]++;
+		$sock = $client->getClient()->sock;
+		if ( !empty(self::$_httpPools[$poolName][$sock]) ) {
+			unset(self::$_httpPools[$poolName][$sock]);
+		}
+		
+		self::$_httpConnNum[$poolName]--;
 		self::$_gcPools[] = $client;
 	}
 	
@@ -200,7 +205,6 @@ class Pool {
 		}
 		//优先从连接池中获取
 		$poolName = $host . ':' . $port;
-		var_dump(count(self::$_tcpPools[$poolName]));
 		if ( !empty(self::$_tcpPools[$poolName]) ) {
 			$tcpCli = array_shift(self::$_tcpPools[$poolName]);
 			return $tcpCli;
@@ -227,7 +231,12 @@ class Pool {
 	 * @param \Aha\Network\Client $client
 	 */
 	public static function gcTcp($poolName,\Aha\Network\Client $client) {
-		self::$_tcpConnNum[$poolName]++;
+		$sock = $client->getClient()->sock;
+		if ( !empty(self::$_tcpPools[$poolName][$sock]) ) {
+			unset(self::$_tcpPools[$poolName][$sock]);
+		}
+		
+		self::$_tcpConnNum[$poolName]--;
 		self::$_gcTcpPools[] = $client;
 	}
 	
@@ -240,7 +249,8 @@ class Pool {
 		if ( !isset(self::$_udpPools[$poolName]) ) {
 			self::$_udpPools[$poolName] = array();
 		}
-		self::$_udpPools[$poolName][] = $client;
+		$sock = $client->getClient()->sock;
+		self::$_udpPools[$poolName][$sock] = $client;
 	}
 	
 	/**
@@ -260,7 +270,6 @@ class Pool {
 		}
 		//优先从连接池中获取
 		$poolName = $host . ':' . $port;
-		var_dump(count(self::$_udpPools[$poolName]));
 		if ( !empty(self::$_udpPools[$poolName]) ) {
 			$udpCli = array_shift(self::$_udpPools[$poolName]);
 			return $udpCli;
@@ -287,7 +296,11 @@ class Pool {
 	 * @param \Aha\Network\Client $client
 	 */
 	public static function gcUdp($poolName,\Aha\Network\Client $client) {
-		self::$_udpConnNum[$poolName]++;
+		$sock = $client->getClient()->sock;
+		if ( !empty(self::$_udpPools[$poolName][$sock]) ) {
+			unset(self::$_udpPools[$poolName][$sock]);
+		}
+		self::$_udpConnNum[$poolName]--;
 		self::$_gcUdpPools[] = $client;
 	}
 	

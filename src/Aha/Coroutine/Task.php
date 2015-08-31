@@ -37,12 +37,6 @@ class Task {
 	protected $_sendValue = null;
 	
 	/**
-	 * @brief 是否第一次中断
-	 * @var type 
-	 */
-	protected $_beforeFirstYield = true;
-	
-	/**
 	 * @brief 子协程栈
 	 * @var type 
 	 */
@@ -53,12 +47,6 @@ class Task {
 	 * @var type 
 	 */
 	protected $_exception = null;
-	
-	/**
-	 * @brief 回调conent
-	 * @var type 
-	 */
-	protected $_callbackResponse = null;
 
 
 	/**
@@ -147,7 +135,8 @@ class Task {
 					}
 					
 					$generator = $this->_coroutineStack->pop();
-					$generator->send($isReturnValue ? $current->getvalue() : null);
+					$generator->send($isReturnValue ? $current->getvalue() : $this->_sendValue);
+					$this->_sendValue = null;
 				}
 				
 				//异步网络IO中断
@@ -156,10 +145,12 @@ class Task {
 				}
 				
 				//当前协程堆栈元素可能有多次yeild 但是与父协程只有一次通信的机会 在通信前运行完
-				$generator->send($current);
+				$generator->send(is_null($current) ? $this->_sendValue : $current);
+				$this->_sendValue = null;
 				while ( $generator->valid() ) {
 					$current = $generator->current();
-					$generator->send($current);
+					$generator->send(is_null($current) ? $this->_sendValue : $current);
+					$this->_sendValue = null;
 				}
 				
 				//协程栈是空的 已经调度完毕
@@ -169,7 +160,8 @@ class Task {
 				
 				//把当前结果传给父协程栈
 				$generator = $this->_coroutineStack->pop();
-				$data = is_null($current) ? $this->_callbackResponse : $current;
+				$data = is_null($current) ? $this->_sendValue : $current;
+				$this->_sendValue = null;
 				$generator->send($data);
 				
 			} catch (\Exception $ex) {
@@ -187,27 +179,67 @@ class Task {
 	 * @return boolean
 	 */
 	protected function _ahaInterrupt($ahaAsyncIo) {
-		if ( $ahaAsyncIo instanceof \Aha\Client\Http ) {
-			//TODO
-			
+		if ( $ahaAsyncIo instanceof \Aha\Client\Http || $ahaAsyncIo instanceof \Aha\Client\Tcp || 
+			 $ahaAsyncIo instanceof \Aha\Client\Udp || $ahaAsyncIo instanceof \Aha\Client\Multi ) {
+			$ahaAsyncIo->loop(array($this, 'ahaClientCallback'));
 			return true;
-		} elseif ( $ahaAsyncIo instanceof \Aha\Storage\Db\Mysqli ) {
-			//TODO
-			
+		} 
+		elseif ( $ahaAsyncIo instanceof \Aha\Storage\Db\Coroutine || 
+				 $ahaAsyncIo instanceof \Aha\Storage\Db\Transaction ) {
+			$ahaAsyncIo->execute(array($this, 'ahaDbCallback'));
 			return true;
+		}
+		elseif ( $ahaAsyncIo instanceof \Aha\Storage\Memory\Coroutine ) {
+			$ahaAsyncIo->execute( array($this, 'ahaRedisCallback') );
 		}
 		
 		return false;
 	}
 	
-	//异步回调完成 继续协程栈运行
-	public function queryDbCallback($result, $dbObj, $dbSock) {
+	/**
+	 * @brief 异步的client调用完成 协程继续运行
+	 * @param type $response
+	 */
+	public function ahaClientCallback($response) {
+		$generator = $this->_coroutineStack->pop();
+		$generator->send($response);
+		
+		//$this->run($generator);
+		//通过这个方式调度 比起上面这种，可以让异步回调的调用方更快的得到控制权 进行资源回收
+		\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($generator);
+	}
+	
+	/**
+	 * @brief 异步的mysql执行完成 协程继续
+	 * @param type $result
+	 * @param type $dbObj
+	 * @param type $dbSock
+	 */
+	public function ahaDbCallback($result, $dbObj, $dbSock) {
 		$data = compact('result', 'dbObj', 'dbSock');
 		
 		$generator = $this->_coroutineStack->pop();
 		$generator->send($data);
 		
-		$this->run($generator);
+		//$this->run($generator);
+		//通过这个方式调度 比起上面这种，可以让异步回调的调用方更快的得到控制权 进行资源回收
+		\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($generator);
+	}
+	
+	/**
+	 * @brief 异步redis query执行完成
+	 * @param type $result
+	 * @param type $error
+	 */
+	public function ahaRedisCallback($result, $error) {
+		$data = compact('result', 'error');
+		
+		$generator = $this->_coroutineStack->pop();
+		$generator->send($data);
+		
+		//$this->run($generator);
+		//通过这个方式调度 比起上面这种，可以让异步回调的调用方更快的得到控制权 进行资源回收
+		\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($generator);
 	}
 	
 }

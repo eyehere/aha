@@ -276,7 +276,11 @@ class Transaction {
 	 * @brief 事务队列bootstrap
 	 * @return type 若返回值为false，说明事务开启失败
 	 */
-	public function execute() {
+	public function execute( $callback = null ) {
+		if ( null !== $callback ) {
+			$this->setCallback($callback);
+		}
+		
 		if ( !empty(self::$_TransGc) ) {
 			//事务对象回收 更快的内存回收和资源释放
 			foreach (self::$_TransGc as $key=>$val) {

@@ -242,4 +242,12 @@ class Redis {
 		);
 	}
 	
+	/**
+	 * @brief 开启一个redis协程
+	 * @return \Aha\Storage\Memory\Coroutine
+	 */
+	public function createCoroutine() {
+		return new \Aha\Storage\Memory\Coroutine($this);
+	}
+	
 }

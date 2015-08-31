@@ -103,7 +103,10 @@ class Udp extends Client {
 	/**
 	 * @brief 对外请求开始loop
 	 */
-	public function loop() {
+	public function loop( $callback = null ) {
+		if ( null !== $callback ) {
+			$this->setCallback($callback);
+		}
 		if ( $this->_objClient->sock &&  $this->_objClient->isConnected() ) {
 			$this->_send($this->_objClient);//连接池取出的连接 send失败就关闭了吧
 		} else {

@@ -333,12 +333,20 @@ class Mysqli {
 		}
 	}
 
-		/**
+	/**
 	 * @brief 开启一个数据库事务
 	 * @return \Aha\Storage\Db\Transaction
 	 */
 	public function beginTrans() {
 		return new \Aha\Storage\Db\Transaction($this);
+	}
+	
+	/**
+	 * @brief 开启一个协程
+	 * @return \Aha\Storage\Db\Coroutine
+	 */
+	public function createCoroutine() {
+		return new \Aha\Storage\Db\Coroutine($this);
 	}
 	
 }

@@ -40,8 +40,8 @@ class Manager {
 	public static function newTask(\Generator $coroutine) {
 		return new \Aha\Coroutine\SystemCall(
 			function ( \Aha\Coroutine\Task $task, \Aha\Coroutine\Scheduler $scheduler ) use ($coroutine) {
-				$task->setSendvalue($scheduler->newTask($scheduler));
-				$scheduler->schedule($scheduler);
+				$task->setSendvalue($scheduler->newTask($coroutine));
+				$scheduler->schedule($task);
 			}
 		);
 	}

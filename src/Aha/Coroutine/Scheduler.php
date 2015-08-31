@@ -19,6 +19,12 @@ namespace Aha\Coroutine;
 class Scheduler {
 	
 	/**
+	 * @brief 调度器实例 单例模式
+	 * @var type 
+	 */
+	protected static $_instance = null;
+
+	/**
 	 * @brief taskId生成器
 	 * @var type 
 	 */
@@ -30,6 +36,17 @@ class Scheduler {
 	 */
 	protected $_taskQueue;
 	
+	/** 
+	 * @brief 调度器单利获取
+	 * @return type
+	 */
+	public static function getInstance() {
+		if ( null === self::$_instance ) {
+			self::$_instance = new \Aha\Coroutine\Scheduler();
+		}
+		return self::$_instance;
+	}
+
 	/**
 	 * @brief 初始化task队列
 	 */
@@ -45,6 +62,19 @@ class Scheduler {
 		$this->_taskQueue->enqueue($task);
 	}
 	
+	/**
+	 * @brief 异步IO任务调度
+	 *		   主要是为了资源的安全释放和更快速的回收
+	 * @param \Aha\Coroutine\Task $task
+	 */
+	public function asyncIoSchedule(\Aha\Coroutine\Task $task) {
+		$this->schedule($task);
+		//这种情况下 如果只有一个任务 需要自己调度自己
+		if ( $this->_taskQueue->count() === 1 ) {
+			$this->run();
+		}
+	}
+
 	/**
 	 * @bief 投递任务到调度器
 	 * @param \Generator $coroutinue
