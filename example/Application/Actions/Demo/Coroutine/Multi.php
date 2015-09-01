@@ -1,5 +1,4 @@
 <?php
-
 /*
   +----------------------------------------------------------------------+
   | Aha                                                                  |
@@ -15,3 +14,28 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
+namespace Application\Actions\Demo\Coroutine;
+use \Aha\Mvc\Action;
+
+class Multi extends Action {
+	
+	public function excute() {
+		$response	= $this->_objDispatcher->getResponse();
+		
+		$objFetch = new \Application\Models\Coroutine\Fetch();
+		$data = yield ($objFetch->getFromMulti()) ;
+		
+//		if ( isset($data['data']['length']['data']['body']) ) {
+//			$response->end($data['data']['length']['data']['body']);
+//		} else {
+//			$response->end(json_encode($data['data']['length']));
+//		}
+		
+		if ( isset($data['data']['trunked']['data']['body']) ) {
+			$response->end($data['data']['trunked']['data']['body']);
+		} else {
+			$response->end(json_encode($data['data']['trunked']));
+		}
+	}
+	
+} 

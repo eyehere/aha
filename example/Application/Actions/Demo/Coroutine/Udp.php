@@ -1,5 +1,4 @@
 <?php
-
 /*
   +----------------------------------------------------------------------+
   | Aha                                                                  |
@@ -15,3 +14,18 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
+namespace Application\Actions\Demo\Coroutine;
+use \Aha\Mvc\Action;
+
+class Udp extends Action {
+	
+	public function excute() {
+		$response	= $this->_objDispatcher->getResponse();
+		
+		$objFetch = new \Application\Models\Coroutine\Fetch();
+		$data = yield ($objFetch->getFromUdp());
+
+		$response->end(json_encode($data));
+	}
+	
+} 

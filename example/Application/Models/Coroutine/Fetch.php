@@ -20,8 +20,37 @@ class Fetch {
 	
 	public function getMeituPage() {
 		$http = \Aha\Client\Pool::getHttpClient('GET', 'http://www.meitu.com/');
-		$http->setRequestId('contentLength');
-		yield ( $http->setCallback( array($this, 'output')) );
+		yield ( $http->setRequestId('contentLength') );
+	}
+	
+	public function getFromTcp() {
+		$tcpCli = \Aha\Client\Pool::getTcpClient('10.10.8.172','9602');
+		$tcpCli->setRequestId('TcpRequest');
+		$arrDara = array(
+			'cmd' => 'demo-server-tcp',
+			'body'=> 'from http request'
+		);
+		yield ( $tcpCli->setPackage(json_encode($arrDara)) );
+	}
+	
+	public function getFromUdp() {
+		$tcpCli = \Aha\Client\Pool::getUdpClient('10.10.8.172','9603');
+		$tcpCli->setRequestId('UdpRequest');
+		$arrDara = array(
+			'cmd' => 'demo-server-udp',
+			'body'=> 'from http request'
+		);
+		yield ( $tcpCli->setPackage(json_encode($arrDara)) );
+	}
+	
+	public function getFromMulti() {
+		$http1 = \Aha\Client\Pool::getHttpClient('GET', 'http://www.qq.com/');
+		$http1->setRequestId('trunked');
+		$http2 = \Aha\Client\Pool::getHttpClient('GET', 'http://www.jd.com/');
+		$http2->setRequestId('length');
+		$mutli = new \Aha\Client\Multi();
+		$mutli->register($http1);
+		yield ( $mutli->register($http2) );
 	}
 	
 }

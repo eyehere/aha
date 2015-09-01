@@ -23,7 +23,7 @@ class Http extends Action {
 		$response	= $this->_objDispatcher->getResponse();
 		
 		$objFetch = new \Application\Models\Coroutine\Fetch();
-		$data = ( yield ($objFetch->getMeituPage()) );
+		$data = yield ($objFetch->getMeituPage()) ;
 		
 		if ( isset($data['data']['body']) ) {
 			$response->end($data['data']['body']);
