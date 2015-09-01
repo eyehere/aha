@@ -102,7 +102,8 @@ class Pool {
 		if ( !isset(self::$_httpPools[$poolName]) ) {
 			self::$_httpPools[$poolName] = array();
 		}
-		self::$_httpPools[$poolName][] = $client;
+		$sock = $client->sock;
+		self::$_httpPools[$poolName][$sock] = $client;
 	}
 	
 	/**
@@ -167,7 +168,7 @@ class Pool {
 	 * @param \Aha\Network\Client $client
 	 */
 	public static function gcHttp($poolName,\Aha\Network\Client $client) {
-		$sock = $client->getClient()->sock;
+		$sock = $client->sock;
 		if ( !empty(self::$_httpPools[$poolName][$sock]) ) {
 			unset(self::$_httpPools[$poolName][$sock]);
 		}
@@ -185,7 +186,8 @@ class Pool {
 		if ( !isset(self::$_tcpPools[$poolName]) ) {
 			self::$_tcpPools[$poolName] = array();
 		}
-		self::$_tcpPools[$poolName][] = $client;
+		$sock = $client->sock;
+		self::$_tcpPools[$poolName][$sock] = $client;
 	}
 	
 	/**
@@ -231,7 +233,7 @@ class Pool {
 	 * @param \Aha\Network\Client $client
 	 */
 	public static function gcTcp($poolName,\Aha\Network\Client $client) {
-		$sock = $client->getClient()->sock;
+		$sock = $client->sock;
 		if ( !empty(self::$_tcpPools[$poolName][$sock]) ) {
 			unset(self::$_tcpPools[$poolName][$sock]);
 		}
@@ -249,7 +251,7 @@ class Pool {
 		if ( !isset(self::$_udpPools[$poolName]) ) {
 			self::$_udpPools[$poolName] = array();
 		}
-		$sock = $client->getClient()->sock;
+		$sock = $client->sock;
 		self::$_udpPools[$poolName][$sock] = $client;
 	}
 	
@@ -296,7 +298,7 @@ class Pool {
 	 * @param \Aha\Network\Client $client
 	 */
 	public static function gcUdp($poolName,\Aha\Network\Client $client) {
-		$sock = $client->getClient()->sock;
+		$sock = $client->sock;
 		if ( !empty(self::$_udpPools[$poolName][$sock]) ) {
 			unset(self::$_udpPools[$poolName][$sock]);
 		}

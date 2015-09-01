@@ -35,6 +35,8 @@ abstract class Client {
 	protected $_port = null;
 	protected $_timeout = 1;
 	protected $_connectTimeout = 0.05;
+	
+	public $sock = null;
 
 	/**
 	 * @brief 请求ID
@@ -97,6 +99,7 @@ abstract class Client {
 	 * @param \swoole_client $client
 	 */
 	public function onConnect(\swoole_client $client) {
+		$this->sock = $client->sock;
 		if ( empty($this->_package) ) {
 			return;
 		}

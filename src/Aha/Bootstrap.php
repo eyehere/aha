@@ -223,6 +223,9 @@ class Bootstrap {
 		//初始化router 注册action file
 		\Aha\Mvc\Router::loadActionPaths($this);
 		
+		//初始化协程调度器
+		$this->_initScheduler();
+		
 		return $this;
 	}
 	

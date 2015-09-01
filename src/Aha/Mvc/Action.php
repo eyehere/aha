@@ -39,7 +39,7 @@ abstract class Action {
 		$this->_objDispatcher = $dispatcher;
 		$scheduler = $this->_objDispatcher->getBootstrap()->getScheduler();
 		if ( null !== $scheduler ) {
-			$coroutine = ( yield $this->excute() );
+			$coroutine = $this->excute();
 			$scheduler->newTask($coroutine);
 			$scheduler->run();
 		} else {

@@ -206,7 +206,7 @@ class Task {
 		
 		//$this->run($generator);
 		//通过这个方式调度 比起上面这种，可以让异步回调的调用方更快的得到控制权 进行资源回收
-		\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($generator);
+		\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($this);
 	}
 	
 	/**
@@ -223,7 +223,7 @@ class Task {
 		
 		//$this->run($generator);
 		//通过这个方式调度 比起上面这种，可以让异步回调的调用方更快的得到控制权 进行资源回收
-		\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($generator);
+		\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($this);
 	}
 	
 	/**
@@ -239,7 +239,7 @@ class Task {
 		
 		//$this->run($generator);
 		//通过这个方式调度 比起上面这种，可以让异步回调的调用方更快的得到控制权 进行资源回收
-		\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($generator);
+		\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($this);
 	}
 	
 }
