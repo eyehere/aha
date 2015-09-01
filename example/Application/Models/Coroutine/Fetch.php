@@ -84,7 +84,6 @@ class Fetch {
 		$conf = $config->get('redis', $instanceName);
 		$conn = \Aha\Storage\Memory\Pool::getConnection($instanceName, $conf);
 
-		
 		$res1 = yield ( $conn->createCoroutine()->hmset('ms',  array('a'=>'12345','b'=>'wqerty')) );
 		$res2 = yield ( $conn->createCoroutine()->hmget('ms',  array('a','b')) );
 		$res3 = yield ( $conn->createCoroutine()->hgetall('ms') );

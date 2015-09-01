@@ -113,8 +113,10 @@ class Task {
 					$this->_exception = null;
 					continue;
 				}
+
 				//协程堆栈链的下一个元素
 				$current = $generator->current();
+				
 				//协程堆栈链表的中断内嵌
 				if ( $current instanceof \Generator ) {
 					$this->_coroutineStack->push($generator);
@@ -191,6 +193,7 @@ class Task {
 		}
 		elseif ( $ahaAsyncIo instanceof \Aha\Storage\Memory\Coroutine ) {
 			$ahaAsyncIo->execute( array($this, 'ahaRedisCallback') );
+			return true;
 		}
 		
 		return false;
@@ -235,6 +238,7 @@ class Task {
 		$data = compact('result', 'error');
 		
 		$generator = $this->_coroutineStack->pop();
+		
 		$generator->send($data);
 		
 		//$this->run($generator);
