@@ -37,7 +37,14 @@ abstract class Action {
 	 */
 	final public function before(\Aha\Mvc\Dispatcher $dispatcher) {
 		$this->_objDispatcher = $dispatcher;
-		$this->excute();
+		$scheduler = $this->_objDispatcher->getBootstrap()->getScheduler();
+		if ( null !== $scheduler ) {
+			$coroutine = ( yield $this->excute() );
+			$scheduler->newTask($coroutine);
+			$scheduler->run();
+		} else {
+			$this->excute();
+		}
 		$this->after();
 	}
 

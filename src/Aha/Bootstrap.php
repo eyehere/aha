@@ -39,6 +39,9 @@ class Bootstrap {
 	//application instance
 	private static $_instance = null;
 	
+	//coroutine scheduler
+	private $_objScheduler = null;
+
 	/**
 	 * @brief application 单例 
 	 * @param string $appNamespace
@@ -176,6 +179,27 @@ class Bootstrap {
 	 */
 	public function getServer() {
 		return $this->_objServer;
+	}
+	
+	/**
+	 * @brief 如果是运行在协程模式下 开启协程调度器
+	 * @return type
+	 */
+	protected function _initScheduler() {
+		$mode = $this->_objConfig->get('aha','mode');
+		if ( empty($mode) || $mode !== 'coroutine' ) {
+			$this->_objScheduler = null;
+			return;
+		}
+		$this->_objScheduler = \Aha\Coroutine\Scheduler::getInstance();
+	}
+	
+	/**
+	 * @brief 获取协程调度器
+	 * @return type
+	 */
+	public function getScheduler() {
+		return $this->_objScheduler;
 	}
 
 	/**
