@@ -53,4 +53,43 @@ class Fetch {
 		yield ( $mutli->register($http2) );
 	}
 	
+	public function getFromDb($dispatcher) {
+		$config = $dispatcher->getBootstrap()->getConfig();
+		$dbName = 'test';
+		$dbConf = $config->get('database', $dbName);
+		$conn = \Aha\Storage\Db\Pool::getConnection($dbName, $dbConf);
+		yield ( $conn->createCoroutine()
+			 ->query("select * from friends limit 10") );
+	}
+	
+	public function dbTrans($dispatcher) {
+		$config = $dispatcher->getBootstrap()->getConfig();
+		$dbName = 'test';
+		$dbConf = $config->get('database', $dbName);
+		$conn = \Aha\Storage\Db\Pool::getConnection($dbName, $dbConf);
+		$trans = $conn->beginTrans()
+				->queue('user','insert into user set name="Aha",phone="15801228065"')
+				->queue('friends',function($result){
+					$friendId = intval($result['user']['last_insert_id']);
+					$sql = 'insert into friends set user_id=6,friend_id='.$friendId;
+					return $sql;
+				})
+				->queue('friendsPlus','insert into friends set user_id=100000,friend_id=1000000');
+		yield ( $trans );			
+	}
+	
+	public function redisDemo($dispatcher) {
+		$config = $dispatcher->getBootstrap()->getConfig();
+		$instanceName = 'test';
+		$conf = $config->get('redis', $instanceName);
+		$conn = \Aha\Storage\Memory\Pool::getConnection($instanceName, $conf);
+
+		
+		$res1 = yield ( $conn->createCoroutine()->hmset('ms',  array('a'=>'12345','b'=>'wqerty')) );
+		$res2 = yield ( $conn->createCoroutine()->hmget('ms',  array('a','b')) );
+		$res3 = yield ( $conn->createCoroutine()->hgetall('ms') );
+		
+		yield ( compact('res1','res2','res3') );
+	}
+	
 }

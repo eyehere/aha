@@ -48,6 +48,7 @@ class Coroutine {
 	public function __call($name, $arguments) {
 		array_unshift($arguments, $name);
 		$this->_arguments = $arguments;
+		return $this;
 	}
 	
 	/**
@@ -55,10 +56,10 @@ class Coroutine {
 	 * @param type $callback
 	 */
 	public function execute( $callback ) {
-		$method = array_unshift($this->_arguments);
+		$method = array_shift($this->_arguments);
 		array_push($this->_arguments, $callback);
 		try {
-			call_user_func_array($callback, $this->_arguments);
+			call_user_func_array(array($this->_redis, $method), $this->_arguments);
 		} catch ( \Exception $ex) {
 			echo "[REDIS_COROUTINE_EXECUTE_EXCEPTION]" . $ex->getMessage() . PHP_EOL;
 		}

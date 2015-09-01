@@ -85,7 +85,7 @@ class Redis {
 	 * @param type $callback
 	 * @return type
 	 */
-	public function hmset($key, array $value, $callback) {
+	public function hmset($key, array $value, $callback = null) {
         $lines[] = "hmset";
         $lines[] = $key;
         foreach($value as $k => $v) {
@@ -103,7 +103,7 @@ class Redis {
 	 * @param type $callback
 	 * @return type
 	 */
-	public function hmget($key, array $value, $callback) {
+	public function hmget($key, array $value, $callback = null) {
 		$fields = $value;
         array_unshift($value, "hmget", $key);
         $cmd = $this->_buildRequest($value);
