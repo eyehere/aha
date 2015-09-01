@@ -113,7 +113,7 @@ class Task {
 					$this->_exception = null;
 					continue;
 				}
-
+				
 				//协程堆栈链的下一个元素
 				$current = $generator->current();
 				
@@ -143,6 +143,7 @@ class Task {
 				
 				//异步网络IO中断
 				if ( $this->_ahaInterrupt($current) ) {
+					$this->_coroutineStack->push($generator);
 					return;
 				}
 				

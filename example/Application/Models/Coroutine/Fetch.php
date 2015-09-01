@@ -20,7 +20,8 @@ class Fetch {
 	
 	public function getMeituPage() {
 		$http = \Aha\Client\Pool::getHttpClient('GET', 'http://www.meitu.com/');
-		yield ( $http->setRequestId('contentLength') );
+		$ret = yield ( $http->setRequestId('contentLength') );
+		yield($ret);
 	}
 	
 	public function getFromTcp() {
@@ -30,7 +31,8 @@ class Fetch {
 			'cmd' => 'demo-server-tcp',
 			'body'=> 'from http request'
 		);
-		yield ( $tcpCli->setPackage(json_encode($arrDara)) );
+		$ret = yield ( $tcpCli->setPackage(json_encode($arrDara)) );
+		yield($ret);
 	}
 	
 	public function getFromUdp() {
@@ -40,7 +42,8 @@ class Fetch {
 			'cmd' => 'demo-server-udp',
 			'body'=> 'from http request'
 		);
-		yield ( $tcpCli->setPackage(json_encode($arrDara)) );
+		$ret = yield ( $tcpCli->setPackage(json_encode($arrDara)) );
+		yield($ret);
 	}
 	
 	public function getFromMulti() {
@@ -50,7 +53,8 @@ class Fetch {
 		$http2->setRequestId('length');
 		$mutli = new \Aha\Client\Multi();
 		$mutli->register($http1);
-		yield ( $mutli->register($http2) );
+		$ret = yield ( $mutli->register($http2) );
+		yield($ret);
 	}
 	
 	public function getFromDb($dispatcher) {
@@ -58,8 +62,9 @@ class Fetch {
 		$dbName = 'test';
 		$dbConf = $config->get('database', $dbName);
 		$conn = \Aha\Storage\Db\Pool::getConnection($dbName, $dbConf);
-		yield ( $conn->createCoroutine()
+		$ret = yield ( $conn->createCoroutine()
 			 ->query("select * from friends limit 10") );
+		yield ($ret);
 	}
 	
 	public function dbTrans($dispatcher) {
@@ -75,7 +80,8 @@ class Fetch {
 					return $sql;
 				})
 				->queue('friendsPlus','insert into friends set user_id=100000,friend_id=1000000');
-		yield ( $trans );			
+		$ret = yield ( $trans );
+		yield ($ret);
 	}
 	
 	public function redisDemo($dispatcher) {
