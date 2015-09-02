@@ -34,7 +34,7 @@ class Async {
 	 * @brief 异步后台进程初始化
 	 */
 	public function __construct() {
-		define('APP_NAME','Deamon');
+		define('APP_NAME','Daemon');
 		define('APPLICATION_PATH', dirname(__DIR__));
 		define('AHA_SRC_PATH', dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . 'src');
 		
@@ -53,17 +53,17 @@ class Async {
 	public function start() {
 		$workerNum = $this->_objAha->getConfig()->get('aha','worker_num');
 		for ( $i=0;$i<$workerNum;$i++ ) {
-			$worker = new \Daemon\Asyncworker();
+			$worker = new \Daemon\Asyncworker($this->_objAha);
 			$process = new \swoole_process(array($worker, 'start'));
-			$process->daemon();
+			//$process->daemon();
 			$workerPid = $process->start();
 			$this->_workers[$workerPid] = $process;
 			$process->write("worker started!");
 		}
-		while( !empty($this->_workers) ) {
-			$workerId = \swoole_process::wait();
-			echo "[Worker Shutdown][WorkerId] $workerId " . PHP_EOL;
-			unset($this->_workers[$workerId]);
+		foreach($this->_workers as $process) {
+			$workerPid = \swoole_process::wait();
+			echo "[Worker Shutdown][WorkerId] $workerPid " . PHP_EOL;
+			unset($this->_workers[$workerPid]);
 		}
 	}
 	

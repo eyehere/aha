@@ -29,7 +29,7 @@ class Config {
 	 * @param \Aha\Mvc\Aha\Bootstrap $objBootstrap
 	 * @return \Aha\Mvc\Config
 	 */
-	public function __construct(\Aha\Bootstrap $objBootstrap) {
+	public function __construct($objBootstrap) {
 		$this->_objBootstrap = $objBootstrap;
 		$this->_initConfig();
 		return $this;
@@ -63,7 +63,7 @@ class Config {
 	 * @param string $path
 	 * @return type
 	 */
-	protected function _loadConfig( $path) {
+	protected function _loadConfig($path) {
 		$direcotryIterator = new \DirectoryIterator($path);
 		foreach ( $direcotryIterator as $iteratorItem ) {
 			if ( ! ( $iteratorItem->isFile() && substr($iteratorItem->getFilename(), -4) === AHA_EXT ) ) {
