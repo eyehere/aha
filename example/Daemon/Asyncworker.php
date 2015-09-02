@@ -24,6 +24,8 @@ class Asyncworker {
 	 */
 	protected $_objAha = null;
 	
+	protected $_worker = null;
+
 	/**
 	 * @brief 使用共享内存的数据
 	 * @param type $objAha
@@ -39,6 +41,7 @@ class Asyncworker {
 	 * @param \swoole_process $worker
 	 */
 	public function start(\swoole_process $worker) {
+		$this->_worker = $worker;
 		swoole_event_add($worker->pipe, function($pipe) use ($worker) {
 			echo $worker->read() . PHP_EOL;
 		});
@@ -61,9 +64,12 @@ class Asyncworker {
 		});
 	}
 	
+	/**
+	 * @brief 数据库
+	 */
 	public function dbTest() {
 		$ret = yield ( $this->dbTrans() );
-		var_dump($ret);
+		echo "[workerId]" . $this->_worker->pid . " [ret]" . serialize($ret) . PHP_EOL;
 	}
 
 	public function dbTrans() {
