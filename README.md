@@ -2,23 +2,25 @@
 
 ----------
 
-Aha is a high performance pure asynchronous network framework base on swoole,written in php.
+Aha is a high performance network framework which support both asynchronous and coroutine mode at the same time base on swoole,written in php.
 
 # Road map #
 
 ----------
 
 1. v1.0.0
-	- Mvc asynchronous
+	- Mvc asynchronous(http、tcp、udp)
 	- Network asynchronous server(http、tcp、udp)
 	- Network asynchronous client(http、tcp、udp、multi、pool)
 	- asynchronous storage(mysql、transaction、redis、pool);
 	- asynchronous logger
-2. v1.+.+
-	- more third party clients such as memcache/beanstalkd support;
+2. v1.1.0
+	- Network(http、tcp、udp) coroutine support;
 	- php daemon multi concurrent process support;
 	- coroutine of multi task schedule for deamon support;
-3. **I will rewrite Aha framework in C because of these reasons below:**
+3. v1.+.+
+	- more third party clients such as memcache/beanstalkd support;
+4. **I will rewrite Aha framework in C because of these reasons below:**
 	- **Lower CPU occupancy;**
 	- **Faster memory recovery cycles;**
 	- **Just install a php extension named Aha** 
