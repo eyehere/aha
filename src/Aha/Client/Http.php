@@ -63,6 +63,9 @@ class Http extends Client {
 	public function init() {
 		$arrUrl			= parse_url($this->_url);
 		$this->_host	= $arrUrl['host'];
+		if ( false !== ip2long($this->_host) ) {
+			$this->_ip = $this->_host;
+		}
 		$this->_port	= isset($arrUrl['port']) ? $arrUrl['port'] : 80;
 		if ( $arrUrl['scheme'] === 'https' ) {
 			$this->_port = 443;
@@ -413,6 +416,6 @@ class Http extends Client {
     }
 
 	public function __destruct() {
-		var_dump(__METHOD__);
+		
 	}
 }

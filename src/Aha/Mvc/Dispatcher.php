@@ -232,7 +232,6 @@ class Dispatcher {
 	 */
 	public function dispatchLoop() {
 		$action = $this->_objRouter->getAction();
-		$method	= $this->_objRouter->getMethod();
 		
 		$objAction = new $action($this);
 		if ( !is_subclass_of($objAction,  '\\Aha\\Mvc\\Action') ) {
