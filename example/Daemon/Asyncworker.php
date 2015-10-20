@@ -68,7 +68,7 @@ class Asyncworker {
 	 * @brief 数据库
 	 */
 	public function dbTest() {
-		$ret = yield ( $this->dbTrans() );
+		$ret = (yield $this->dbTrans());
 		echo "[workerId]" . $this->_worker->pid . " [ret]" . serialize($ret) . PHP_EOL;
 	}
 
@@ -85,7 +85,7 @@ class Asyncworker {
 					return $sql;
 				})
 				->queue('friendsPlus','insert into friends set user_id=100000,friend_id=1000000');
-		$ret = yield ( $trans );
+		$ret = (yield $trans );
 		yield ($ret);
 	}
 	
