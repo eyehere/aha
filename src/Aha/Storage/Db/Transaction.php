@@ -289,7 +289,7 @@ class Transaction {
 		}
 		
 		if ( count($this->_arrQueueKey) <=1 ) {
-			throw new Exception("Transaction require more then two write style sql");
+			throw new \Exception("Transaction require more then two write style sql");
 		}
 		
 		$sql = 'set autocommit=0';
