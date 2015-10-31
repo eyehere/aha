@@ -85,6 +85,22 @@ class Logger {
 		$this->_bolWebTrace	= $webTrace;
 		$this->_bolBackTrace= $backTrace;
 	}
+    
+    /**
+     * @brief 获取日志文件
+     * @return type
+     */
+    public function getLogFileName() {
+        return $this->_strLogFile;
+    }
+    
+    /**
+     * @brief 设置日志文件
+     * @param type $logFileName
+     */
+    public function setLogFileName($logFileName) {
+        $this->_strLogFile = $logFileName;
+    }
 	
 	/**
 	 * @brief 日志格式化
@@ -322,8 +338,10 @@ class Logger {
 	 */
 	protected function _write($logContent) {
 		//file_put_contents()
-		if ( false === swoole_async_write($this->_strLogFile, $logContent, -1) ) {
-			throw new Exception("log file {$this->_strLogFile} write failed!");
+		//if ( false === swoole_async_write($this->_strLogFile, $logContent, -1) ) {
+			//throw new \Exception("log file {$this->_strLogFile} write failed!");
+        if ( false === file_put_contents($this->_strLogFile, $logContent, FILE_APPEND) ) {
+            echo "log file {$this->_strLogFile} write failed!".PHP_EOL;
 		}
 		return true;
 	}
@@ -338,7 +356,11 @@ class Logger {
 		if ( !isset(\Aha\Log\Logger::$arrLoggers[$name]) ) {
 			\Aha\Log\Logger::$arrLoggers[$name] = new \Aha\Log\Logger($name, $logFile, $logLevel, $webTrace, $backTrace);
 		}
-		return \Aha\Log\Logger::$arrLoggers[$name];
+        $objLogger = \Aha\Log\Logger::$arrLoggers[$name];
+        if ( $logFile !== $objLogger->getLogFileName() ) {
+            $objLogger->setLogFileName($logFile);
+        }
+		return $objLogger;
 	}
 
 	/**
@@ -350,7 +372,7 @@ class Logger {
 	public static function __callStatic($name, $arguments) {
 		$logFile	= isset($arguments[0]) && is_string($arguments[0]) ? $arguments[0] : false;
 		if ( false === $logFile ) {
-			throw new Exception("Log {$name} file name is not allowed null");
+			throw new \Exception("Log {$name} file name is not allowed null");
 		}
 		$logLevel	= isset($arguments[1]) ? $arguments[1] : \Aha\Log\Logger::DEBUG;
 		$webTrace	= isset($arguments[2]) ? $arguments[2] : false;
