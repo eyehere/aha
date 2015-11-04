@@ -357,9 +357,15 @@ class Logger {
 			\Aha\Log\Logger::$arrLoggers[$name] = new \Aha\Log\Logger($name, $logFile, $logLevel, $webTrace, $backTrace);
 		}
         $objLogger = \Aha\Log\Logger::$arrLoggers[$name];
-        if ( $logFile !== $objLogger->getLogFileName() ) {
-            $objLogger->setLogFileName($logFile);
-        }
+		
+		if ( $objLogger->getLogFilename() != $logFile ) {
+			$logPath = dirname($logFile);
+			if ( !is_dir($logPath) ) {
+				mkdir($logPath, 0755, true);
+			}
+			$objLogger->setLogFileName($logFile);
+		}
+		
 		return $objLogger;
 	}
 
