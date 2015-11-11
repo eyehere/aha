@@ -23,7 +23,7 @@ class Db extends Action {
 		$response	= $this->_objDispatcher->getResponse();
 		
 		$objFetch = new \Application\Models\Coroutine\Fetch();
-		$data = yield ($objFetch->getFromDb($this->_objDispatcher)) ;
+		$data = (yield $objFetch->getFromDb($this->_objDispatcher)) ;
 		$result = isset($data['result']) ? $data['result'] : false;
 		
 		$arrData = array();

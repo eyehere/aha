@@ -23,7 +23,7 @@ class Tcp extends Action {
 		$response	= $this->_objDispatcher->getResponse();
 		
 		$objFetch = new \Application\Models\Coroutine\Fetch();
-		$data = yield ($objFetch->getFromTcp());
+		$data = (yield $objFetch->getFromTcp());
 
 		$response->end(json_encode($data));
 	}

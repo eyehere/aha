@@ -20,7 +20,7 @@ class Fetch {
 	
 	public function getMeituPage() {
 		$http = \Aha\Client\Pool::getHttpClient('GET', 'http://www.meitu.com/');
-		$ret = yield ( $http->setRequestId('contentLength') );
+		$ret = ( yield $http->setRequestId('contentLength') );
 		yield($ret);
 	}
 	
@@ -31,7 +31,7 @@ class Fetch {
 			'cmd' => 'demo-server-tcp',
 			'body'=> 'from http request'
 		);
-		$ret = yield ( $tcpCli->setPackage(json_encode($arrDara)) );
+		$ret = ( yield $tcpCli->setPackage(json_encode($arrDara)) );
 		yield($ret);
 	}
 	
@@ -42,7 +42,7 @@ class Fetch {
 			'cmd' => 'demo-server-udp',
 			'body'=> 'from http request'
 		);
-		$ret = yield ( $tcpCli->setPackage(json_encode($arrDara)) );
+		$ret = ( yield $tcpCli->setPackage(json_encode($arrDara)) );
 		yield($ret);
 	}
 	
@@ -53,7 +53,7 @@ class Fetch {
 		$http2->setRequestId('length');
 		$mutli = new \Aha\Client\Multi();
 		$mutli->register($http1);
-		$ret = yield ( $mutli->register($http2) );
+		$ret = ( yield $mutli->register($http2) );
 		yield($ret);
 	}
 	
@@ -62,7 +62,7 @@ class Fetch {
 		$dbName = 'test';
 		$dbConf = $config->get('database', $dbName);
 		$conn = \Aha\Storage\Db\Pool::getConnection($dbName, $dbConf);
-		$ret = yield ( $conn->createCoroutine()
+		$ret = ( yield $conn->createCoroutine()
 			 ->query("select * from friends limit 10") );
 		yield ($ret);
 	}
@@ -80,7 +80,7 @@ class Fetch {
 					return $sql;
 				})
 				->queue('friendsPlus','insert into friends set user_id=100000,friend_id=1000000');
-		$ret = yield ( $trans );
+		$ret = ( yield $trans );
 		yield ($ret);
 	}
 	
@@ -90,9 +90,9 @@ class Fetch {
 		$conf = $config->get('redis', $instanceName);
 		$conn = \Aha\Storage\Memory\Pool::getConnection($instanceName, $conf);
 
-		$res1 = yield ( $conn->createCoroutine()->hmset('ms',  array('a'=>'12345','b'=>'wqerty')) );
-		$res2 = yield ( $conn->createCoroutine()->hmget('ms',  array('a','b')) );
-		$res3 = yield ( $conn->createCoroutine()->hgetall('ms') );
+		$res1 = ( yield $conn->createCoroutine()->hmset('ms',  array('a'=>'12345','b'=>'wqerty')) );
+		$res2 = ( yield $conn->createCoroutine()->hmget('ms',  array('a','b')) );
+		$res3 = ( yield $conn->createCoroutine()->hgetall('ms') );
 		
 		yield ( compact('res1','res2','res3') );
 	}

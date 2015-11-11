@@ -23,7 +23,7 @@ class Multi extends Action {
 		$response	= $this->_objDispatcher->getResponse();
 		
 		$objFetch = new \Application\Models\Coroutine\Fetch();
-		$data = yield ($objFetch->getFromMulti()) ;
+		$data = (yield $objFetch->getFromMulti()) ;
 		
 //		if ( isset($data['data']['length']['data']['body']) ) {
 //			$response->end($data['data']['length']['data']['body']);

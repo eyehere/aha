@@ -23,7 +23,7 @@ class Udp extends Action {
 		$response	= $this->_objDispatcher->getResponse();
 		
 		$objFetch = new \Application\Models\Coroutine\Fetch();
-		$data = yield ($objFetch->getFromUdp());
+		$data = (yield $objFetch->getFromUdp());
 
 		$response->end(json_encode($data));
 	}

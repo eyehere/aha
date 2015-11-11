@@ -23,7 +23,7 @@ class Trans extends Action {
 		$response	= $this->_objDispatcher->getResponse();
 		
 		$objFetch = new \Application\Models\Coroutine\Fetch();
-		$data = yield ($objFetch->dbTrans($this->_objDispatcher)) ;
+		$data = (yield $objFetch->dbTrans($this->_objDispatcher)) ;
 
 		$response->end(json_encode($data));
 	}

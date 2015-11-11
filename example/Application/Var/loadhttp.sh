@@ -1,9 +1,13 @@
 #! /bin/sh
 
 php_BIN=/home/luweijun/opt/soft/php/bin/php
-server_BIN=../Server/HttpServer.php
-master_PID=../Var/Master.pid
-manager_PID=../Var/Manager.pid
+
+workDir=`pwd`
+scriptDir=`dirname $0`
+
+server_BIN=$workDir/$scriptDir"/../Server/HttpServer.php"
+master_PID=$workDir/$scriptDir"/../Var/Master.pid"
+manager_PID=$workDir/$scriptDir"/../Var/Manager.pid"
 
 case "$1" in
 	start)
