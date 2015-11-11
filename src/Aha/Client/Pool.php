@@ -130,9 +130,12 @@ class Pool {
 		}
 		$poolName = $host . ':' . $port;
 		
-		if ( !empty(self::$_httpPools[$poolName]) ) {
+		while ( !empty(self::$_httpPools[$poolName]) ) {
 			$httpCli = array_shift(self::$_httpPools[$poolName]);
-			return self::_decorateHttpClient($httpCli, $method, $url);
+            $objClient = $httpCli->getClient();
+            if ( is_object($objClient) && is_numeric($objClient->sock) ) {
+                return self::_decorateHttpClient($httpCli, $method, $url);
+            }
 		}
 		//如果当前连接数大于连接池大小 跑异常
 		//http client 不做queue是因为http请求每个连接请求占用的时间相对比较长，应该控制好相对的连接池大小
