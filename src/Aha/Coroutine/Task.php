@@ -142,8 +142,9 @@ class Task {
 				}
 				
 				//异步网络IO中断
-				if ( $this->_ahaInterrupt($current) ) {
+				if ( $this->_isAhaInterrupt($current) ) {
 					$this->_coroutineStack->push($generator);
+                    $this->_ahaInterrupt($current);
 					return;
 				}
 				
@@ -174,6 +175,27 @@ class Task {
 				}
 			}
 		}
+	}
+    
+    /**
+	 * @brief 是否是异步网络IO中断处理
+	 * @param type $ahaAsyncIo
+	 * @return boolean
+	 */
+	protected function _isAhaInterrupt($ahaAsyncIo) {
+		if ( $ahaAsyncIo instanceof \Aha\Client\Http || $ahaAsyncIo instanceof \Aha\Client\Tcp || 
+			 $ahaAsyncIo instanceof \Aha\Client\Udp || $ahaAsyncIo instanceof \Aha\Client\Multi ) {
+			return true;
+		} 
+		elseif ( $ahaAsyncIo instanceof \Aha\Storage\Db\Coroutine || 
+				 $ahaAsyncIo instanceof \Aha\Storage\Db\Transaction ) {
+			return true;
+		}
+		elseif ( $ahaAsyncIo instanceof \Aha\Storage\Memory\Coroutine ) {
+			return true;
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -208,9 +230,9 @@ class Task {
 		$generator = $this->_coroutineStack->pop();
 		$generator->send($response);
 		
-		//$this->run($generator);
+		$this->run($generator);
 		//通过这个方式调度 比起上面这种，可以让异步回调的调用方更快的得到控制权 进行资源回收
-		\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($this);
+		//\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($this);
 	}
 	
 	/**
@@ -225,9 +247,9 @@ class Task {
 		$generator = $this->_coroutineStack->pop();
 		$generator->send($data);
 		
-		//$this->run($generator);
+		$this->run($generator);
 		//通过这个方式调度 比起上面这种，可以让异步回调的调用方更快的得到控制权 进行资源回收
-		\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($this);
+		//\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($this);
 	}
 	
 	/**
@@ -242,9 +264,9 @@ class Task {
 		
 		$generator->send($data);
 		
-		//$this->run($generator);
+		$this->run($generator);
 		//通过这个方式调度 比起上面这种，可以让异步回调的调用方更快的得到控制权 进行资源回收
-		\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($this);
+		//\Aha\Coroutine\Scheduler::getInstance()->asyncIoSchedule($this);
 	}
 	
 }

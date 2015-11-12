@@ -155,7 +155,7 @@ class Transaction {
 	 */
 	private function _handleTransException() {
 		try {
-			call_user_func($this->_callback, false. false, false);
+			call_user_func($this->_callback, false, false, false);
 		} catch (\Exception $e) {
 			echo "Mysqli transCallback Exception: {$e->getMessage()}" . PHP_EOL;
 		}
