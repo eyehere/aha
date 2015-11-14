@@ -24,6 +24,12 @@ class Fetch {
 		yield($ret);
 	}
 	
+	public function getBaiduPage() {
+		$http = \Aha\Client\Pool::getHttpClient('GET', 'https://www.baidu.com/');
+		$ret = ( yield $http->setRequestId('contentLength') );
+		yield($ret);
+	}
+	
 	public function getFromTcp() {
 		$tcpCli = \Aha\Client\Pool::getTcpClient('10.10.8.172','9602');
 		$tcpCli->setRequestId('TcpRequest');

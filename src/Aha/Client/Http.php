@@ -51,7 +51,14 @@ class Http extends Client {
 		$this->_method	= $method;
 		$this->_url		= $url;
 
-		$client = new \swoole_client(SWOOLE_SOCK_TCP , SWOOLE_SOCK_ASYNC);
+		$sockType = SWOOLE_SOCK_TCP;
+		
+		$scheme = parse_url($url, PHP_URL_SCHEME);
+		if ( $scheme == 'https' ) {
+			$sockType |= SWOOLE_SSL;
+		}
+		
+		$client = new \swoole_client($sockType , SWOOLE_SOCK_ASYNC);
 		parent::__construct($client, $this->_host, $this->_port, $timeout, $connectTimeout);
 		
 		$this->_initConfig();
