@@ -183,7 +183,8 @@ class Transaction {
 		//rollback成功 $this->_arrResult也得是false
 		$this->_arrResult = false;//回滚的话回调结果直接置为false即可
 		$sql = 'rollback';
-		return $this->_dbObj->query($sql, array($this, 'transCallback'), false, $dbSock);
+		return $this->_dbObj->query($sql, array($this, 'transCallback'), true, $dbSock);
+		//return $this->_dbObj->query($sql, array($this, 'transCallback'), false, $dbSock);
 	}
 	
 	/**
@@ -234,7 +235,8 @@ class Transaction {
 	private function _commit($dbSock) {
 		$this->_current++;
 		$sql = 'commit';
-		return $this->_dbObj->query($sql, array($this, 'transCallback'), false, $dbSock);
+		return $this->_dbObj->query($sql, array($this, 'transCallback'), true, $dbSock);
+		//return $this->_dbObj->query($sql, array($this, 'transCallback'), false, $dbSock);
 	}
 	
 	/**
@@ -251,8 +253,8 @@ class Transaction {
 
 		$this->_current++;
 		//事务完成 开启自动提交
-		$sql = 'set autocommit=1';
-		return $this->_dbObj->query($sql, array($this, 'transCallback'), 'autocommiton', $dbSock);
+		/*$sql = 'set autocommit=1';
+		return $this->_dbObj->query($sql, array($this, 'transCallback'), 'autocommiton', $dbSock);*/
 	}
 	
 	/**
@@ -292,7 +294,8 @@ class Transaction {
 			throw new \Exception("Transaction require more then two write style sql");
 		}
 		
-		$sql = 'set autocommit=0';
+		//$sql = 'set autocommit=0';
+		$sql = 'START TRANSACTION';
 		return $this->_dbObj->query($sql, array($this, 'transCallback'), false);
 	}
 	

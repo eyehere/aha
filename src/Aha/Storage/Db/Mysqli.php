@@ -182,10 +182,10 @@ class Mysqli {
 	 * @return type
 	 */
 	private function _onReadTrans($dbObj,$dbSock, $result, $onReadFree) {
-		$arrTransKeep = array(
+		/*$arrTransKeep = array(
 			\Aha\Storage\Db\Transaction::TRANS_COMMIT,
 			\Aha\Storage\Db\Transaction::TRANS_ROLLBACK
-		);
+		);*/
 		
 		$arrTrans = array(
 			\Aha\Storage\Db\Transaction::TRANS_AUTO_COMMIT_ON,
@@ -195,7 +195,7 @@ class Mysqli {
 		
 		//事务处理过程中，此连接不能被释放
 		//commit or rollback成功 连接暂时不能被释放
-		if ( false === $onReadFree || ($result && in_array($onReadFree, $arrTransKeep, true)) ) {
+		if ( false === $onReadFree /*|| ($result && in_array($onReadFree, $arrTransKeep, true))*/ ) {
 			return;
 		}
 		
