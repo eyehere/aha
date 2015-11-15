@@ -2,8 +2,8 @@
 TODO:
 ------
 
-    1.https support
-    2.read and write timeout not support(暂未启动定时器)
-    3.http client 内存泄漏(php7)
-    4.timer timeout耗费大量cpu(暂未启动定时器)
-    5.http client location follow
+    1.read and write timeout not support,timer timeout耗费大量cpu(暂未启动定时器)
+    2.http client 内存泄漏(php7)
+
+	1.generator thow exception
+	2.client use package_length_check

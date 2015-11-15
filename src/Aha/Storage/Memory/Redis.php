@@ -144,7 +144,7 @@ class Redis {
 		//控制队列的堆积
 		if ( count($this->_poolQueue) >= $this->_poolSize ) {
 			$message = 'Redis Warning: poolQueue Size is beyond poolSize';
-			echo "$message ![CMD] {$cmd}" . PHP_EOL;
+			\Aha\Log\Sys::log()->warning( "$message ![CMD] {$cmd}" );
 			$this->_queryFailedNotify($callback, null, $message);
 			return false;
 		}
@@ -178,7 +178,7 @@ class Redis {
 		try {
 			call_user_func($callback, false, $message);
 		} catch (\Exception $e) {
-			echo "Redis _queryFailedNotify Exception: {$e->getMessage()}" . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Redis _queryFailedNotify Exception: {$e->getMessage()}" );
 		}
 	}
 	
@@ -191,7 +191,7 @@ class Redis {
 		try {
 			call_user_func($callback, $result, $error);
 		} catch (\Exception $e) {
-			echo "Redis Response Callback Exception: {$e->getMessage()}" . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Redis Response Callback Exception: {$e->getMessage()}" );
 		}
 		//如果此连接已经关闭 放入回收器 等待触发资源回收
 		if ( !$redisCli->getClient()->isConnected() ) {
@@ -225,7 +225,7 @@ class Redis {
 			$task = array_shift($this->_poolQueue);
 			$this->_doQuery($task['cmd'], $task['callback'], $task['fields']);
 		}
-		echo "Redis _trigger [DEBUG] [cnt] $idleCnt" . PHP_EOL;
+		\Aha\Log\Sys::log()->debug( "Redis _trigger [DEBUG] [cnt] $idleCnt" );
 	}
 	
 	/**

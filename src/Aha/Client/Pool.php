@@ -137,7 +137,7 @@ class Pool {
                 return self::_decorateHttpClient($httpCli, $method, $url);
             }
 		}
-		//如果当前连接数大于连接池大小 跑异常
+		//如果当前连接数大于连接池大小 抛异常
 		//http client 不做queue是因为http请求每个连接请求占用的时间相对比较长，应该控制好相对的连接池大小
 		//queue可能会是相应时间更长 系统恶化
 		self::$_httpPoolSize[$poolName] = $poolSize;
@@ -210,11 +210,14 @@ class Pool {
 		}
 		//优先从连接池中获取
 		$poolName = $host . ':' . $port;
-		if ( !empty(self::$_tcpPools[$poolName]) ) {
+		while ( !empty(self::$_tcpPools[$poolName]) ) {
 			$tcpCli = array_shift(self::$_tcpPools[$poolName]);
-			return $tcpCli;
+            $objClient = $tcpCli->getClient();
+            if ( is_object($objClient) && is_numeric($objClient->sock) ) {
+                return $tcpCli;
+            }
 		}
-		//如果当前连接数大于连接池大小 跑异常
+		//如果当前连接数大于连接池大小 抛出异常
 		//tcp client 不做queue是因为tcp请求每个连接请求占用的时间相对比较长，应该控制好相对的连接池大小
 		//queue可能会是相应时间更长 系统恶化
 		self::$_tcpPoolSize[$poolName] = $poolSize;
@@ -275,11 +278,14 @@ class Pool {
 		}
 		//优先从连接池中获取
 		$poolName = $host . ':' . $port;
-		if ( !empty(self::$_udpPools[$poolName]) ) {
+		while ( !empty(self::$_udpPools[$poolName]) ) {
 			$udpCli = array_shift(self::$_udpPools[$poolName]);
-			return $udpCli;
+            $objClient = $udpCli->getClient();
+            if ( is_object($objClient) && is_numeric($objClient->sock) ) {
+                return $udpCli;
+            }
 		}
-		//如果当前连接数大于连接池大小 跑异常
+		//如果当前连接数大于连接池大小 抛异常
 		//udp client 不做queue是因为udp请求每个连接请求占用的时间相对比较长，应该控制好相对的连接池大小
 		//queue可能会是相应时间更长 系统恶化
 		self::$_udpPoolSize[$poolName] = $poolSize;

@@ -79,7 +79,7 @@ class Daemon {
 	}
 	
 	/**
-	 * @brief 在server的第一行就加载Bootstrap文件，病调用此静态方法初始化Loader
+	 * @brief 在server的第一行就加载Bootstrap文件，并调用此静态方法初始化Loader
 	 * @return Loader 可以在Loader中继续注册更多的命名空间个路径的对应关系
 	 */
 	public static function initLoader() {

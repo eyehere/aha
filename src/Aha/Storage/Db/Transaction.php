@@ -157,7 +157,7 @@ class Transaction {
 		try {
 			call_user_func($this->_callback, false, false, false);
 		} catch (\Exception $e) {
-			echo "Mysqli transCallback Exception: {$e->getMessage()}" . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Mysqli transCallback Exception: {$e->getMessage()}" );
 		}
 		$this->_clean();
 		self::$_TransGc[] = $this;
@@ -246,7 +246,7 @@ class Transaction {
 		try {
 			call_user_func($this->_callback, $this->_arrResult, false, false);
 		} catch (\Exception $e) {
-			echo "Mysqli transCallback Exception[commit success]: {$e->getMessage()}" . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Mysqli transCallback Exception[commit success]: {$e->getMessage()}" );
 		}
 
 		$this->_current++;
@@ -263,7 +263,7 @@ class Transaction {
 		try {
 			call_user_func($this->_callback, false, false, false);
 		} catch (\Exception $e) {
-			echo "Mysqli transCallback Exception[commit failed]: {$e->getMessage()}" . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Mysqli transCallback Exception[commit failed]: {$e->getMessage()}" );
 		}
 
 		$this->_clean();

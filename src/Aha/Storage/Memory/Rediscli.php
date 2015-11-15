@@ -117,7 +117,7 @@ class Rediscli extends Client {
 								),
 				'package'	=> $this->_package
 			);
-			echo "Redis onConnect send failed![error]" . serialize($error) . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Redis onConnect send failed![error]" . serialize($error) );
 			
 			$callback  = $this->_callback;
 			$arguments = $this->_arguments;
@@ -132,7 +132,7 @@ class Rediscli extends Client {
 			try {
 				call_user_func($callback, false, $arguments['callback'],$this,'Redis send error');
 			} catch (\Exception $ex) {
-				echo "Redis onConnect send callback failed![exception]" . $ex->getMessage() . PHP_EOL;
+				\Aha\Log\Sys::log()->error( "Redis onConnect send callback failed![exception]" . $ex->getMessage() );
 			}
 			return false;
 		}
@@ -165,7 +165,7 @@ class Rediscli extends Client {
 							),
 			'package'	=> $this->_package
 		);
-		echo "Redis onError![error]" . serialize($error) . PHP_EOL;
+		\Aha\Log\Sys::log()->error( "Redis onError![error]" . serialize($error) );
 		
 		$callback  = $this->_callback;
 		$arguments = $this->_arguments;
@@ -178,7 +178,7 @@ class Rediscli extends Client {
 		try {
 			call_user_func($callback, false, $arguments['callback'],$this,'Redis onError');
 		} catch (\Exception $ex) {
-			echo "Redis onError callback![exception]" . $ex->getMessage() . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Redis onError callback![exception]" . $ex->getMessage() );
 		}
 		
 	}
@@ -199,7 +199,7 @@ class Rediscli extends Client {
 		
         if ($type == '-') {
             $result = substr($lines[0], 1);
-			echo "Rediscli parse error:[data]$data" . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Rediscli parse error:[data]$data" );
 			return $this->_notify(false, $result);
         } elseif ($type == '+') {
             $result = substr($lines[0], 1);
@@ -213,7 +213,7 @@ class Rediscli extends Client {
             return $this->_notify($result);
         } else {
             $message = "Response is not a redis result. String:$data";
-			echo $message . PHP_EOL;
+			\Aha\Log\Sys::log()->warning( $message );
 			return $this->_notify(false, $message);
         }
 	}
@@ -316,7 +316,7 @@ class Rediscli extends Client {
 		try {
 			call_user_func($callback, $result, $arguments['callback'],$this, $error);
 		} catch (\Exception $ex) {
-			echo "Redis onReceive notify callback![exception]" . $ex->getMessage() . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Redis onReceive notify callback![exception]" . $ex->getMessage() );
 		}
 	}
 
@@ -342,8 +342,8 @@ class Rediscli extends Client {
 	 */
 	public function onClose(\swoole_client $cli) {
         if ( !empty($this->_package) ) {
-			echo "Redis Warning: Maybe receive a Close event , "
-					. "such as Redis server close the socket !" . PHP_EOL;
+			\Aha\Log\Sys::log()->warning( "Redis Warning: Maybe receive a Close event , "
+					. "such as Redis server close the socket !" );
 			return;
         }
 		
@@ -354,7 +354,7 @@ class Rediscli extends Client {
 		try {
 			call_user_func($callback, false, $arguments['callback'],$this, 'Redis closed timeout');
 		} catch (\Exception $ex) {
-			echo "Redis Closed notify callback![exception]" . $ex->getMessage() . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Redis Closed notify callback![exception]" . $ex->getMessage() );
 		}
     }
 

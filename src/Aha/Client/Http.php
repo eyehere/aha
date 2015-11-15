@@ -300,7 +300,7 @@ class Http extends Client {
 		try {
 			call_user_func($this->_callback, $response);
 		} catch (\Exception $ex) {
-			echo "HttpClient callback failed![exception]" . $ex->getMessage() . PHP_EOL;
+			\Aha\Log\Sys::log()->error("HttpClient callback failed![exception]" . $ex->getMessage());
 		}
 		
 		$this->_connectionManager();

@@ -86,8 +86,8 @@ class Mysqli {
 				$this->_conf['password'], $this->_conf['dbName'], $this->_conf['port']);
 		
 		if ( $dbObj->connect_error ) {
-			echo "Mysqli Error [connect_db_failed][errno]{$dbObj->connect_errno}"
-			. "[error]{$dbObj->connect_error} [conf]" . serialize($this->_conf) . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Mysqli Error [connect_db_failed][errno]{$dbObj->connect_errno}"
+			. "[error]{$dbObj->connect_error} [conf]" . serialize($this->_conf) );
 			return false;
 		}
 		
@@ -97,12 +97,12 @@ class Mysqli {
 		
 		$dbSock = swoole_get_mysqli_sock($dbObj);
 		if ( !is_long($dbSock) ) {
-			echo "Mysqli Error [swoole_get_mysqli_sock]" . serialize($dbSock) . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Mysqli Error [swoole_get_mysqli_sock]" . serialize($dbSock) );
 			goto errorClose;
 		}
 		$ret = swoole_event_add($dbSock, array($this, 'onQueryResponse'));
 		if ( !is_long($ret) ) {
-			echo "Mysqli Error [swoole_event_add]" . serialize($ret) . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Mysqli Error [swoole_event_add]" . serialize($ret) );
 			goto errorClose;
 		}
 		
@@ -129,7 +129,7 @@ class Mysqli {
 			$this->_busyPool[$dbSock]['dbObj']->close();
 			unset($this->_busyPool[$dbSock]);
 		} else {
-			echo "Mysqli Exception [_close] not found [sock] $dbSock " . PHP_EOL;
+			\Aha\Log\Sys::log()->warning( "Mysqli Exception [_close] not found [sock] $dbSock " );
 		}
 		$this->_connectionNum--;
 		return $this;
@@ -143,8 +143,8 @@ class Mysqli {
 	public function onQueryResponse($dbSock) {
 		$task = isset($this->_busyPool[$dbSock]) ? $this->_busyPool[$dbSock] : null;
 		if ( empty($task) ) {//这种情况直接丢弃
-			echo "MySQLi Warning: Maybe SQLReady receive a Close event , "
-					. "such as Mysql server close the socket !" . PHP_EOL;
+			\Aha\Log\Sys::log()->warning( "MySQLi Warning: Maybe SQLReady receive a Close event , "
+					. "such as Mysql server close the socket !" );
 			$this->_close($dbSock);
 			return false;
 		}
@@ -158,7 +158,7 @@ class Mysqli {
 		try {
 			call_user_func($callback, $result, $dbObj, $dbSock);
 		} catch (\Exception $e) {
-			echo "Mysqli onReadCallback Exception: {$e->getMessage()} [SQL]{$sql}" . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Mysqli onReadCallback Exception: {$e->getMessage()} [SQL]{$sql}" );
 		}
 		
 		if ( is_object($result) ) {
@@ -166,7 +166,7 @@ class Mysqli {
 		}
 		
 		if ( !$result ) {
-			echo "MySQLi onReadCallback Error:[SQL] {$sql} [error]" . mysqli_error($dbObj) . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "MySQLi onReadCallback Error:[SQL] {$sql} [error]" . mysqli_error($dbObj) );
 		}
 		
 		$this->_onReadTrans($dbObj,$dbSock, $result, $onReadFree);
@@ -229,7 +229,7 @@ class Mysqli {
 			$task = array_shift($this->_poolQueue);
 			$this->_doQuery($task['sql'], $task['callback'], $task['onReadFree']);
 		}
-		echo "Mysqli _trigger [DEBUG] [cnt] $idleCnt" . PHP_EOL;
+		\Aha\Log\Sys::log()->debug( "Mysqli _trigger [DEBUG] [cnt] $idleCnt" );
 	}
 
 	/**
@@ -263,12 +263,12 @@ class Mysqli {
 		}
 
 		if ( $mysqli->errno == 2013 || $mysqli->errno == 2006 ) {
-			echo "Mysqli Expected Error[errno]{$mysqli->errno} [error]{$mysqli->error} [SQL] $sql" . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Mysqli Expected Error[errno]{$mysqli->errno} [error]{$mysqli->error} [SQL] $sql" );
 			$this->_close($db['dbSock']);//连接中断的重新建立新的连接
 			return $this->query($sql, $callback, $onReadFree, $mysqliSock, $retry++);
 		}
 		//其它异常情况 需要通知宿主 但不用关闭连接 可能是sql写错
-		echo "Mysqli Unexpected Error[errno]{$mysqli->errno} [error]{$mysqli->error} [SQL] $sql" . PHP_EOL;
+		\Aha\Log\Sys::log()->error( "Mysqli Unexpected Error[errno]{$mysqli->errno} [error]{$mysqli->error} [SQL] $sql" );
 		$this->_queryFailedNotify($callback);
 		return false;
 	}
@@ -283,7 +283,7 @@ class Mysqli {
 	 */
 	public function query($sql, $callback, $onReadFree = true, $dbSock = null, $retry = 0) {
 		if ( $retry >= 1 ) {
-			echo "Mysqli Error:[retry exception] [SQL]$sql" . PHP_EOL;
+			\Aha\Log\Sys::log()->warning( "Mysqli Error:[retry exception] [SQL]$sql" );
 			$this->_queryFailedNotify($callback, $dbSock);//2013和2006重试两次了 直接关闭得了
 			return false;
 		}
@@ -298,7 +298,7 @@ class Mysqli {
 		//连接池动态增长
 		if ( $this->_connectionNum < $this->_poolSize ) {
 			if ( false === $this->_connect() ) {
-				echo "Mysqli Error:[expand connect error] [SQL]$sql" . PHP_EOL;
+				\Aha\Log\Sys::log()->error( "Mysqli Error:[expand connect error] [SQL]$sql" );
 				$this->_queryFailedNotify($callback);
 				return false;
 			}
@@ -307,7 +307,7 @@ class Mysqli {
 		
 		//控制等待队列的大小
 		if ( count($this->_poolQueue) >= $this->_poolSize  ) {
-			echo "MySQLi Warning: poolQueue Size is beyond poolSize ![SQL] {$sql}" . PHP_EOL;
+			\Aha\Log\Sys::log()->warning( "MySQLi Warning: poolQueue Size is beyond poolSize ![SQL] {$sql}" );
 			$this->_queryFailedNotify($callback);
 			return false;
 		}
@@ -329,7 +329,7 @@ class Mysqli {
 		try {
 			call_user_func($callback, false, false, false);
 		} catch (\Exception $e) {
-			echo "Mysqli _queryFailedNotify Exception: {$e->getMessage()}" . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "Mysqli _queryFailedNotify Exception: {$e->getMessage()}" );
 		}
 	}
 

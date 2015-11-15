@@ -61,7 +61,7 @@ class Coroutine {
 		try {
 			call_user_func_array(array($this->_redis, $method), $this->_arguments);
 		} catch ( \Exception $ex) {
-			echo "[REDIS_COROUTINE_EXECUTE_EXCEPTION]" . $ex->getMessage() . PHP_EOL;
+			\Aha\Log\Sys::log()->error( "[REDIS_COROUTINE_EXECUTE_EXCEPTION]" . $ex->getMessage() );
 		}
 	}
 	

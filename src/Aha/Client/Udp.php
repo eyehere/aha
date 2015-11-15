@@ -64,7 +64,7 @@ class Udp extends Client {
 		try {
 			call_user_func($this->_callback, $response);
 		} catch (\Exception $ex) {
-			echo "UdpClient callback failed![exception]" . $ex->getMessage() . PHP_EOL;
+			\Aha\Log\Sys::log()->error("UdpClient callback failed![exception]" . $ex->getMessage());
 		}
 		
 		$this->_connectionManager();

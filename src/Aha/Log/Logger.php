@@ -76,9 +76,11 @@ class Logger {
 	 */
 	public function __construct($name, $logFile, $logLevel=\Aha\Log\Logger::DEBUG,	$webTrace = false,	$backTrace = false) {
 		$this->_strName		=	$name;
-		$logPath = dirname($logFile);
-		if ( !is_dir($logPath) ) {
-			mkdir($logPath, 0755, true);
+		if ( false === strpos($logFile, 'php://') ) {
+			$logPath = dirname($logFile);
+			if ( !is_dir($logPath) ) {
+				mkdir($logPath, 0755, true);
+			}
 		}
 		$this->_strLogFile	= $logFile;
 		$this->_logLevel	= $logLevel;
@@ -358,7 +360,7 @@ class Logger {
 		}
         $objLogger = \Aha\Log\Logger::$arrLoggers[$name];
 		
-		if ( $objLogger->getLogFilename() != $logFile ) {
+		if ( false === strpos($logFile, 'php://') && $objLogger->getLogFilename() != $logFile ) {
 			$logPath = dirname($logFile);
 			if ( !is_dir($logPath) ) {
 				mkdir($logPath, 0755, true);

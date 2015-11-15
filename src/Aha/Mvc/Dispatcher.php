@@ -238,7 +238,11 @@ class Dispatcher {
 			throw new \Exception( "class $action is not extends \\Aha\\Mvc\\Action" );
 		}
 		
-		call_user_func(array($objAction, 'before'), $this);
+		try {
+			call_user_func(array($objAction, 'before'), $this);
+		} catch ( \Exception $e) {
+			\Aha\Log\Sys::log()->error( '\\Aha\\Mvc\\Action dispatchLoop callback exception:'.$e->getMessage() );
+		}
 	}
 	
 }

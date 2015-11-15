@@ -169,7 +169,7 @@ class Task {
 				$generator->send($data);
 				
 			} catch (\Exception $ex) {
-				echo "[Coroutine_Task_Run_Exception]" . $ex->getMessage() . PHP_EOL;
+				\Aha\Log\Sys::log()->error( "[Coroutine_Task_Run_Exception]" . $ex->getMessage() );
 				if ( $this->_coroutineStack->isEmpty() ) {
 					return;
 				}

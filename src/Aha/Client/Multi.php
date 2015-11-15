@@ -70,7 +70,13 @@ class Multi {
 			'const'		=> microtime(true) - $this->_const,
 			'data'		=> $this->_arrResponses
 		);
-		call_user_func($this->_callback, $response);
+		
+		try {
+			call_user_func($this->_callback, $response);
+		} catch (\Exception $ex) {
+			\Aha\Log\Sys::log()->error("MultiClient callback failed![exception]" . $ex->getMessage());
+		}
+		
 	}
 
 

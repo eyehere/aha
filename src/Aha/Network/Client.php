@@ -129,7 +129,7 @@ abstract class Client {
 			try {
 				call_user_func($callback, $response);
 			} catch (\Exception $ex) {
-				echo "Client onConnect _send callback failed![exception]" . $ex->getMessage() . PHP_EOL;
+				\Aha\Log\Sys::log()->error("Client onConnect _send callback failed![exception]" . $ex->getMessage());
 			}
 			return false;
 		} else {
@@ -167,7 +167,7 @@ abstract class Client {
 			try {
 				call_user_func($this->_callback, $response);
 			} catch (\Exception $ex) {
-				echo "Client onError![exception]" . $ex->getMessage() . PHP_EOL;
+				\Aha\Log\Sys::log()->error("Client onError![exception]" . $ex->getMessage());
 			}
 		}
 		

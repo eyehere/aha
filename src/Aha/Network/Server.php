@@ -206,9 +206,9 @@ abstract class Server {
 	 */
 	public function onWorkerStop(\swoole_server $server,  $workerId) {
 		if ( $workerId >= $this->_objServer->setting['worker_num'] ) {
-			echo '[' . date('Y-m-d H:i:s') . "] Task worker [$workerId] stoped!" . PHP_EOL;
+			\Aha\Log\Sys::log()->debug("Task worker [$workerId] stoped!");
 		} else {
-			echo '[' . date('Y-m-d H:i:s') . "] Event worker [$workerId] stoped!" . PHP_EOL;
+			\Aha\Log\Sys::log()->debug(" Event worker [$workerId] stoped!");
 		}
 	}
 	
@@ -269,7 +269,7 @@ abstract class Server {
 	 * 主要用于监控和报警 很有可能遇到了致命错误或者coredump
 	 */
 	public function onWorkerError(\swoole_server $server,  $workerId,  $workerPid,  $exitCode) {
-		echo "[onWorkerError_CALLBACK] [workerId]$workerId [workerPid]$workerPid [exitCode]$exitCode" . PHP_EOL;
+		\Aha\Log\Sys::log()->error("[onWorkerError_CALLBACK] [workerId]$workerId [workerPid]$workerPid [exitCode]$exitCode");
 	}
 	
 	/**

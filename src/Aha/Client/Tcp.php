@@ -66,7 +66,7 @@ class Tcp extends Client {
 		try {
 			call_user_func($this->_callback, $response);
 		} catch (\Exception $ex) {
-			echo "TcpClient callback failed![exception]" . $ex->getMessage() . PHP_EOL;
+			\Aha\Log\Sys::log()->error("TcpClient callback failed![exception]" . $ex->getMessage());
 		}
 		
 		$this->_connectionManager();
