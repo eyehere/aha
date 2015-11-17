@@ -47,22 +47,22 @@ class Shared {
     }
     
     //获取当前处理中任务计数器
-	public function &getCurrentTaskTable() {
+	public static function &getCurrentTaskTable() {
 		return self::$_objTable;
 	}
 	
 	//往table写数据
-	public function setCurrentTaskTable($key, $value) {
+	public static function setCurrentTaskTable($key, $value) {
 		return self::$_objTable->set($key, $value);
 	}
 	
 	//删除当前处理中任务计数器
-	public function delCurrentTaskTable($pid) {
+	public static function delCurrentTaskTable($pid) {
 		self::$_objTable->del($pid);
 	}
 	
 	//获取当前进程的taskNum
-	public function getCurrentTaskNumByKey($key) {
+	public static function getCurrentTaskNumByKey($key) {
 		$worker  = self::$_objTable->get($key);
         $taskNum = 0;
         if ( isset($worker['taskNum']) ) {
@@ -76,12 +76,12 @@ class Shared {
 	}
 	
 	//计数增加
-	public function incr($key, $column, $incrby = 1) {
+	public static function incr($key, $column, $incrby = 1) {
 		return self::$_objTable->incr($key, $column, $incrby);
 	}
 	
 	//计数减小
-	public function decr($key, $column, $incrby = 1) {
+	public static function decr($key, $column, $incrby = 1) {
 		$ret = self::$_objTable->decr($key, $column, $incrby);
         if ( false === $ret ) {
             return false;

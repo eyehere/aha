@@ -84,12 +84,12 @@ class Drive {
 	 */
 	protected function _start() {
 		//进程刚拉起来的时候先做任务的状态复位(重启、升级、进程异常退出在拉起的情况)
-		$objModel = new \Daemon\Models\XX($this->_objAha);
-		$ret = ( yield $objModel->XXXX() );
+		$objModel = new \Daemon\Models\Demo($this->_objAha);
+		$ret = ( yield $objModel->dbTrans() );
 		
 		//重置中间状态失败 退出事件循环 等待master重新拉起进程
 		if ( false === $ret ) {
-			Log::monitor(array(Monitor::KEY=>Monitor::RESET_PROCESSING_ERR));
+			Log::monitor()->error(array(Monitor::KEY=>Monitor::RESET_PROCESSING_ERR));
 			\swoole_event_exit();
 		} else {
 			//重置中间状态成功 初始化定时器
@@ -122,6 +122,7 @@ class Drive {
                 }
 			} else {
 				$coroutine = $this->_taskDetect();
+                Log::appLog()->debug(array('_bolProcessing'=>false,'_bolNeedTrigger'=>false));
 			}
 
 			if ( $coroutine instanceof \Generator ) {
@@ -155,16 +156,16 @@ class Drive {
 	
 	//是否有等待发布的任务
 	protected function _getTasks() {
-		$objGrantLogic = new \Daemon\Logic\Grant($this->_objAha);
-		$grantTasks = ( yield $objGrantLogic->getDistributeTasks() );
+		$objModel = new \Daemon\Models\Demo($this->_objAha);
+		$objTasks = ( yield $objModel->getFromDb() );
 		
-		yield ($grantTasks);
+		yield ($objTasks);
 	}
 
 	//任务处理
 	protected function _taskProcessing($grantTasks) {
-		$objGrantLogic = new \Daemon\Logic\Grant($this->_objAha);
-		$grantRet = ( yield $objGrantLogic->lockDistributeProcess($grantTasks, $this->_worker->pid) );
+		$objModel = new \Daemon\Models\Demo($this->_objAha);
+		$grantRet = ( yield $objModel->lockTask($grantTasks, $this->_worker->pid) );
 		if ( false === $grantRet ) {
 			yield (false);
 		} else {
@@ -176,7 +177,7 @@ class Drive {
 	
 	//发送审核通过等待发布的任务
 	protected function _sendGrantTasks($grantTasks = null) {
-		$driveConf		= $this->_objAha->getConfig()->get('dtc','drive');
+		$driveConf		= $this->_objAha->getConfig()->get('aha','drive');
 		$maxProcessNum	= intval($driveConf['max_process_num']);
 
 		$currentTaskNum = \Daemon\Library\Ipc\Shared::getMaxTaskNumAtomic()->get();
@@ -201,30 +202,20 @@ class Drive {
 			yield (AHA_AGAIN); 
 		} else {
             //发送完毕 更新任务组状态为已经完成中止
-			$taskGid = $this->_grantTasks['task_group'][0]['id'];
-			$objGrantLogic = new \Daemon\Logic\Grant($this->_objAha);
-            
-            $grantDoneRet = ( yield $objGrantLogic->grantDone(array($taskGid)) );
-            
+			
 			$this->_clean();
             
 			yield (AHA_DECLINED);
 		}
 	}
     
-    //发送之前过一下反作弊的过滤
+    //发送之前过一下过滤
     protected function _filterAndSend( $record,$driveConf ) {
-        //发送之前进行黑名单的过滤
-        $objSpam = \Daemon\Models\Spam\Blacklist::getInstance($driveConf['spam_file']);
-        if ( !$objSpam->isBlack($record['driver_id']) ) {
-            $package = array(
-                'cmd'       => Constant::PACKAGE_TYPE_DISTRIBUTE,
-                'content'   => $record
-            );
-            $this->_send($package);
-        } else {
-            Log::appLog()->notice(array('spamBlackHited'=>$record));
-        }
+        $package = array(
+            'cmd'       => Constant::PACKAGE_TYPE_TASK,
+            'content'   => $record
+        );
+        $this->_send($package);
     }
 
     //获取一条一条的任务记录
@@ -234,9 +225,9 @@ class Drive {
             yield false;
         }
         if ( null === $this->_objGrantIterator ) {
-            $objReactor = new \Daemon\Logic\Reactor($this->_objAha);
+            $cityDir = $this->_objAha->getConfig()->get('aha','city_dir');
 			$this->_grantTasks = $grantTasks;
-            $this->_objGrantIterator = ( yield $objReactor->getTaskGenerator($grantTasks) );
+            $this->_objGrantIterator = new \Daemon\Models\Friend($cityDir, array(0), $grantTasks);
         }
         
         if ( $this->_objGrantIterator->valid() ) {
@@ -278,7 +269,7 @@ class Drive {
     protected function _onAckProcess() {
         $this->_objProtocolPackage->readPipe($this->_worker);
 		
-        $arrPackage = $this->_objProtocolPackage->getPackageArr();
+        $arrPackage = $this->_objProtocolPackage->getPackages();
         if ( empty($arrPackage) ) {
             return AHA_AGAIN;;
         }

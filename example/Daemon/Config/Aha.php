@@ -38,5 +38,6 @@ return array(
 	'stats'	=> array(
 		'interval'      =>	300000,	//单位 ms 5分钟
         'stats_interval'=>  10000,//每10S进行状态监测
-	)
+	),
+    'city_dir'   =>  dirname(__DIR__) . '/Data/',
 );

@@ -20,7 +20,7 @@ use \Daemon\Util\Log;
 use \Daemon\Util\Monitor;
 use \Daemon\Util\Constant;
 
-class Distribute {
+class Task {
 	
 	//Aha实例
 	protected $_objAha = null;
@@ -74,7 +74,8 @@ class Distribute {
     protected function _main () {
         $this->_objProtocolPackage->readPipe($this->_worker);
 		
-        $arrPackage = $this->_objProtocolPackage->getPackageArr();
+        $arrPackage = $this->_objProtocolPackage->getPackages();
+        
         if ( empty($arrPackage) ) {
             return;
         }
@@ -105,9 +106,9 @@ class Distribute {
 
     //收到来自主进程的消息
 	protected function _doTask($package) {
-		$objGrantLogic = new \Daemon\Logic\Grant($this->_objAha);
+		$objModel = new \Daemon\Models\Demo($this->_objAha);
         
-        $grantRet = ( yield $objGrantLogic->grantTaskToDriver($package) );
+        $grantRet = ( yield $objModel->doTask($package) );
         
 		if ( false === $grantRet ) {
             Log::redoLog()->debug(array('redo'=>$package));

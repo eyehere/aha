@@ -59,36 +59,35 @@ class Signal {
         //必须为false，非阻塞模式
         //信号发生时可能同时有多个子进程退出
         //必须循环执行wait直到返回false
-        $objTable = \Daemon\Library\Ipc\Shared::getInstance();
+        $objManager = \Daemon\Library\Ipc\Manager::getInstance();
 		while( $result = \swoole_process::wait(false) ) {
             $pid = $result['pid'];
-            $objManager = \Daemon\Library\Ipc\Manager::getInstance();
             if ( $objManager->hasDriveWorker($pid) ) {
                 $objManager->delDriveWorker($pid);
-                $objTable->delCurrentTaskTable($pid);
+                \Daemon\Library\Ipc\Shared::delCurrentTaskTable($pid);
                 if ( !$this->_sigterm ) {
-                    $objManager->createDriveWorker(\Daemon\Daemon\Master::getInstance()->getAha(), 1);
+                    $objManager->createDriveWorker(\Daemon\Process\Master::getInstance()->getAha(), 1);
                 }
             } 
-            elseif ( $objManager->hasDistributeWorker($pid) ) {
-                $objManager->delDistributeWorker($pid);
-                $objTable->delCurrentTaskTable($pid);
+            elseif ( $objManager->hasTaskWorker($pid) ) {
+                $objManager->delTaskWorker($pid);
+                \Daemon\Library\Ipc\Shared::delCurrentTaskTable($pid);
                 if ( !$this->_sigterm ) {
-                    $objManager->createDirtributeWorker(\Daemon\Daemon\Master::getInstance()->getAha(), 1);
+                    $objManager->createDirtributeWorker(\Daemon\Process\Master::getInstance()->getAha(), 1);
                 }
             }
             elseif ( $objManager->hasRedoWorker($pid) ) {
                 $objManager->delRedoWorker($pid);
-                $objTable->delCurrentTaskTable($pid);
+                \Daemon\Library\Ipc\Shared::delCurrentTaskTable($pid);
                 if ( !$this->_sigterm ) {
-                    $objManager->createRedoWorker(\Daemon\Daemon\Master::getInstance()->getAha(), 1);
+                    $objManager->createRedoWorker(\Daemon\Process\Master::getInstance()->getAha(), 1);
                 }
             }
             elseif ( $objManager->hasStatsWorker($pid) ) {
                 $objManager->delStatsWorker($pid);
-                $objTable->delCurrentTaskTable($pid);
+                \Daemon\Library\Ipc\Shared::delCurrentTaskTable($pid);
                 if ( !$this->_sigterm ) {
-                    $objManager->createStatsWorker(\Daemon\Daemon\Master::getInstance()->getAha(), 1);
+                    $objManager->createStatsWorker(\Daemon\Process\Master::getInstance()->getAha(), 1);
                 }
             }
             else {
@@ -97,7 +96,7 @@ class Signal {
         }
 		
 		//如果是SIGTERM信号 并且子进程都已经退出了 父进程终止
-		$workers = $objTable->getCurrentTaskTable();
+		$workers = \Daemon\Library\Ipc\Shared::getCurrentTaskTable();
 		if ( $this->_sigterm && !($workers->count()) ) {
 			\swoole_event_exit();
 		}

@@ -97,9 +97,8 @@ class Stats {
         
         $total = 0;
         $arrRet = array();
-        $objTable = \Daemon\Library\Ipc\Shared::getInstance();
         foreach ( $arrWorkers as $pid ) {
-            $taskNum = $objTable->getCurrentTaskNumByKey($pid);
+            $taskNum = \Daemon\Library\Ipc\Shared::getCurrentTaskNumByKey($pid);
             $arrRet["w_$pid"] = $taskNum;
             $total += $taskNum;
         }
@@ -118,7 +117,13 @@ class Stats {
         }
         Log::statsLog()->debug($arrRet);
         
-        $this->_flowPredict($flow);
+        $average = $this->_flowPredict($flow);
+        
+        if ( $average <= 0 ) {
+            foreach ( $arrWorkers as $pid ) {
+                \Daemon\Library\Ipc\Shared::setCurrentTaskTable($pid, array('taskNum'=>0));
+            }
+        }
     }
     
     //流量预测和清零
@@ -129,13 +134,15 @@ class Stats {
         array_push($this->_arrFlow, $flow);
         $average = ceil(array_sum($this->_arrFlow)/count($this->_arrFlow));
         
-        $driveConf = $this->_objAha->getConfig()->get('dtc','drive');
+        $driveConf = $this->_objAha->getConfig()->get('aha','drive');
 		$maxFlow  = $driveConf['max_process_num'];
         if ( $average > $maxFlow*0.85 ) {
             \Daemon\Library\Ipc\Shared::getMaxTaskNumAtomic()->set(0);//根据流量预测 可能已经堵住了 清零自恢复
             Log::monitor()->error(array(Monitor::KEY=>Monitor::FLOW_OVER_PREDICT_RESET,'average'=>$average,'maxFlow'=>$maxFlow*0.85));
         }
         Log::statsLog()->debug( array('type'=>'flowPredict','average'=>$average,'maxFlow'=>$maxFlow,'point'=>$maxFlow*0.85) );
+        
+        return $average;
     }
 	
 }

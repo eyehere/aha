@@ -50,8 +50,7 @@ class Manager {
 	
 	//管道事件监听
 	protected function _initPipeEvents($process, $workerType) {
-        $objTable = \Daemon\Library\Ipc\Shared::getInstance();
-		$objTable->setCurrentTaskTable($process->pid, array('taskNum'=>0,'workerType'=>$workerType));
+		\Daemon\Library\Ipc\Shared::setCurrentTaskTable($process->pid, array('taskNum'=>0,'workerType'=>$workerType));
 		
 		$objMaster = \Daemon\Process\Master::getInstance();
 		

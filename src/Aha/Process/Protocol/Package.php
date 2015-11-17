@@ -28,7 +28,7 @@ class Package {
 	 * @brief 消息包体的结尾字符
 	 * @var string 
 	 */
-	protected $_packageEof = '\r\n\r\n';
+	protected $_packageEof = "\r\n\r\n";
 
 	/**
 	 * @brief 消息包体的结束符
@@ -36,7 +36,7 @@ class Package {
 	 */
 	public function __construct($packageEof = null) {
 		$this->_content = '';
-		if ( null !== $this->_packageEof ) {
+		if ( null !== $packageEof ) {
 			$this->_packageEof = $packageEof;
 		}
 	}
@@ -74,6 +74,7 @@ class Package {
 	 */
 	public function getPackages() {
 		$arrPackage = array();
+        
 		while ( false !== ( $part = strstr($this->_content, $this->_packageEof, true) ) ) {
 			$arrPackage[] = $part;
 			$this->_content = substr($this->_content, strlen($part.$this->_packageEof));

@@ -67,7 +67,7 @@ class Master {
 		$this->_objAha->getLoader()->registerNamespace(APP_NAME, APPLICATION_PATH);
 		$this->_objAha->run();
 		
-		$this->_objProtocolPackage = new \Daemon\Library\Protocol\Package();
+		$this->_objProtocolPackage = new \Aha\Process\Protocol\Package();
         
         \Daemon\Library\Ipc\Shared::initTable();
 	}
@@ -77,12 +77,12 @@ class Master {
 		$objSignal = \Daemon\Library\Ipc\Signal::getInstance();
 		$objSignal->initSignal();
 		
-		$workerConf = $this->_objAha->getConfig()->get('dtc','process');
+		$workerConf = $this->_objAha->getConfig()->get('aha','process');
         
 		\Daemon\Library\Ipc\Shared::initAtomic();
 
 		$this->_objManager = \Daemon\Library\Ipc\Manager::getInstance();
-		$this->_objManager->createTaskWorker($this->_objAha, $workerConf['distribute_worker_num']);
+		$this->_objManager->createTaskWorker($this->_objAha, $workerConf['task_worker_num']);
 		$this->_objManager->createRedoWorker($this->_objAha, $workerConf['redo_worker_num']);
 		$this->_objManager->createDriveWorker($this->_objAha, $workerConf['drive_worker_num']);
 		$process = $this->_objManager->createStatsWorker($this->_objAha, $workerConf['stats_worker_num']);
@@ -112,7 +112,8 @@ class Master {
 	public function dispatch($process) {
 		$this->_objProtocolPackage->readPipe($process);
 		
-		$arrPackage = $this->_objProtocolPackage->getPackageArr();
+		$arrPackage = $this->_objProtocolPackage->getPackages();
+        
 		if ( empty($arrPackage) ) {
 			return;
 		}
@@ -131,7 +132,7 @@ class Master {
 		}
 	}
 	
-	//通知发布进程
+	//通知task进程
 	protected function _notifyTaskWorker($arrPackage) {
 		$package = json_encode($arrPackage);
 		
@@ -141,16 +142,16 @@ class Master {
 		
 		$ret = $distributeWorkers[$pid]->write($package . Constant::PACKAGE_EOF);
 		if ( false === $ret ) {
-			Log::monitor(array(Monitor::KEY=>Monitor::IPC_PIPE_WRITE_ERR, '#package'=>$package));
+			Log::monitor()->error(array(Monitor::KEY=>Monitor::IPC_PIPE_WRITE_ERR, '#package'=>$package));
 			Log::redoLog(array('redo'=>$package));
 			return false;
 		}
         
 		$res = \Daemon\Library\Ipc\Shared::getCurrentTaskTable()->incr($pid,'taskNum', 1);
 		if ( false === $res ) {
-			Log::monitor(array(Monitor::KEY=>Monitor::TABLE_INCR_ERR, 'res'=>$res,'#package'=>$package));
+			Log::monitor()->error(array(Monitor::KEY=>Monitor::TABLE_INCR_ERR, 'res'=>$res,'#package'=>$package));
 		}
-        Log::billLog()->debug( array('#package'=>$package, 'type'=>'distribute') );
+        Log::billLog()->debug( array('#package'=>$package, 'type'=>'task') );
 		return true;
 	}
 	
@@ -160,15 +161,15 @@ class Master {
 		$index	= mt_rand(0, count($pids)-1);
 		$pid	= $pids[$index];
 		
-		$driveConf  = $this->_objAha->getConfig()->get('dtc','drive');
+		$driveConf  = $this->_objAha->getConfig()->get('aha','drive');
 		$maxCnt		= intval($driveConf['max_task']);
-		$taskNum = \Daemon\Library\Ipc\Shared::getCurrentTaskTable()->getCurrentTaskNumByKey($pid);
+		$taskNum = \Daemon\Library\Ipc\Shared::getCurrentTaskNumByKey($pid);
 		if ( $taskNum < $maxCnt ) {
 			return $pid;
 		}
 		
 		foreach ( $pids as $sparePid ) {
-			$taskNum = \Daemon\Library\Ipc\Shared::getCurrentTaskTable()->getCurrentTaskNumByKey($sparePid);
+			$taskNum = \Daemon\Library\Ipc\Shared::getCurrentTaskNumByKey($sparePid);
 			if ( $taskNum < $maxCnt ) {
 				return $sparePid;
 			}
@@ -182,7 +183,7 @@ class Master {
 		$pid = $package['content']['pid'];
 		$res = \Daemon\Library\Ipc\Shared::getCurrentTaskTable()->decr($pid,'taskNum', 1);
 		if ( false === $res ) {
-			Log::monitor(array(Monitor::KEY=>Monitor::TABLE_DECR_ERR, '#package'=>$package));
+			Log::monitor()->error(array(Monitor::KEY=>Monitor::TABLE_DECR_ERR, '#package'=>$package));
 		}
         
         $driveWorker = $this->_objManager->getDriveWorker();
@@ -190,7 +191,7 @@ class Master {
 		
 		$ret = $driveProcess->write(json_encode($package) . Constant::PACKAGE_EOF);
 		if ( false === $ret ) {
-			Log::monitor(array(Monitor::KEY=>Monitor::IPC_PIPE_WRITE_ERR, '#package'=>$package));
+			Log::monitor()->error(array(Monitor::KEY=>Monitor::IPC_PIPE_WRITE_ERR, '#package'=>$package));
 			Log::redoLog(array('redo'=>$package));
 			return false;
 		}

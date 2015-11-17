@@ -14,7 +14,7 @@
   | Author: Weijun Lu  <yiming_6weijun@163.com>                          |
   +----------------------------------------------------------------------+
 */
-namespace Dtc\Util;
+namespace Daemon\Util;
 
 use Aha\Log\Logger;
 
@@ -42,7 +42,7 @@ class Log {
 	 * @return obj
 	 */
 	public static function appLog() {
-		$logFile = dirname(__DIR__) . self::LOG_PATH . date('Ymd') . '/dtc.log';
+		$logFile = dirname(__DIR__) . self::LOG_PATH . date('Ymd') . '/app.log';
 		$objLogger = Logger::appLog($logFile, Logger::DEBUG, 
 						!Logger::WEB_TRACE_ON, Logger::BACK_TRACE_ON);
 		return $objLogger;

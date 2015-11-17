@@ -9,7 +9,7 @@ daemon_BIN=$workDir/$scriptDir"/../Process/Master.php"
 master_PID=$workDir/$scriptDir'/Daemon.pid'
 daemon_LOG=$workDir/$scriptDir'/../Logs/Daemon.log'
 
-ps -ef | grep 'DAEMON_MASTER' | grep -v grep | awk '{print $2}' > $master_PID
+ps -ef | grep -v 'DTC' | grep 'DAEMON_MASTER' | grep -v grep | awk '{print $2}' > $master_PID
 
 datetime=`date +'%Y-%m-%d %k:%M:%S'`
 
@@ -36,9 +36,9 @@ case "$1" in
 	;;
 
 	restart)
-		$0 stop
+		sh $0 stop
                 sleep 1
-		$0 start
+		sh $0 start
 	;;
 
 	*)
