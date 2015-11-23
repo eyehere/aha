@@ -265,7 +265,7 @@ class Mysqli {
 		if ( $mysqli->errno == 2013 || $mysqli->errno == 2006 ) {
 			\Aha\Log\Sys::log()->error( "Mysqli Expected Error[errno]{$mysqli->errno} [error]{$mysqli->error} [SQL] $sql" );
 			$this->_close($db['dbSock']);//连接中断的重新建立新的连接
-			return $this->query($sql, $callback, $onReadFree, $mysqliSock, $retry++);
+			return $this->query($sql, $callback, $onReadFree, $dbSock, $retry++);
 		}
 		//其它异常情况 需要通知宿主 但不用关闭连接 可能是sql写错
 		\Aha\Log\Sys::log()->error( "Mysqli Unexpected Error[errno]{$mysqli->errno} [error]{$mysqli->error} [SQL] $sql" );
