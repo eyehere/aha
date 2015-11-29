@@ -120,7 +120,7 @@ class Mysqli {
 	 * @param type $dbSock
 	 * @return \Aha\Storage\Db\Mysqli
 	 */
-	protected function _close($dbSock) {
+	protected function _close($dbSock, $db = null) {
 		swoole_event_del($dbSock);
 		if ( isset($this->_idlePool[$dbSock]) ) {
 			$this->_idlePool[$dbSock]['dbObj']->close();
@@ -128,6 +128,8 @@ class Mysqli {
 		} elseif (isset ($this->_busyPool[$dbSock]) ) {
 			$this->_busyPool[$dbSock]['dbObj']->close();
 			unset($this->_busyPool[$dbSock]);
+		} elseif ( null !== $db && isset ($db['dbObj']) ) {
+			$db['dbObj']->close();
 		} else {
 			\Aha\Log\Sys::log()->warning( "Mysqli Exception [_close] not found [sock] $dbSock " );
 		}
@@ -264,8 +266,8 @@ class Mysqli {
 
 		if ( $mysqli->errno == 2013 || $mysqli->errno == 2006 ) {
 			\Aha\Log\Sys::log()->error( "Mysqli Expected Error[errno]{$mysqli->errno} [error]{$mysqli->error} [SQL] $sql" );
-			$this->_close($db['dbSock']);//连接中断的重新建立新的连接
-			return $this->query($sql, $callback, $onReadFree, $dbSock, $retry++);
+			$this->_close($db['dbSock'],$db);//连接中断的重新建立新的连接
+			return $this->query($sql, $callback, $onReadFree, $dbSock, ++$retry);
 		}
 		//其它异常情况 需要通知宿主 但不用关闭连接 可能是sql写错
 		\Aha\Log\Sys::log()->error( "Mysqli Unexpected Error[errno]{$mysqli->errno} [error]{$mysqli->error} [SQL] $sql" );
@@ -282,18 +284,18 @@ class Mysqli {
 	 * @return boolean
 	 */
 	public function query($sql, $callback, $onReadFree = true, $dbSock = null, $retry = 0) {
-		if ( $retry >= 1 ) {
+		if ( $retry >= 3 ) {
 			\Aha\Log\Sys::log()->warning( "Mysqli Error:[retry exception] [SQL]$sql" );
 			$this->_queryFailedNotify($callback, $dbSock);//2013和2006重试两次了 直接关闭得了
 			return false;
 		}
 		//用于事务指定在同一个连接上进行query
 		if ( null !== $dbSock ) {
-			return $this->_doQuery($sql, $callback, $onReadFree, $dbSock);
+			return $this->_doQuery($sql, $callback, $onReadFree, $dbSock, $retry);
 		}
 		//非事务类型 或 事务类型的第一次 query
 		if (count($this->_idlePool) > 0 ) {
-			return $this->_doQuery($sql, $callback, $onReadFree, $dbSock);
+			return $this->_doQuery($sql, $callback, $onReadFree, $dbSock, $retry);
 		}
 		//连接池动态增长
 		if ( $this->_connectionNum < $this->_poolSize ) {
@@ -302,7 +304,7 @@ class Mysqli {
 				$this->_queryFailedNotify($callback);
 				return false;
 			}
-			return $this->_doQuery($sql, $callback, $onReadFree, $dbSock);
+			return $this->_doQuery($sql, $callback, $onReadFree, $dbSock, $retry);
 		}
 		
 		//控制等待队列的大小
