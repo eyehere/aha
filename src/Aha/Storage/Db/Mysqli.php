@@ -244,9 +244,7 @@ class Mysqli {
 		if ( null !== $dbSock ) {
 			$db = $this->_busyPool[$dbSock];
 		} else {
-			$idleSock = array_rand($this->_idlePool);
-			$db = $this->_idlePool[$idleSock];
-			unset($this->_idlePool[$idleSock]);
+			$db = array_pop($this->_idlePool);
 		}
 		$mysqli = $db['dbObj'];
 		$mysqliSock = $db['dbSock'];
