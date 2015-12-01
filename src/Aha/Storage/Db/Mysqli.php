@@ -120,7 +120,7 @@ class Mysqli {
 	 * @param type $dbSock
 	 * @return \Aha\Storage\Db\Mysqli
 	 */
-	protected function _close($dbSock, $db = null) {
+	protected function _close($dbSock) {
 		swoole_event_del($dbSock);
 		if ( isset($this->_idlePool[$dbSock]) ) {
 			$this->_idlePool[$dbSock]['dbObj']->close();
@@ -128,8 +128,6 @@ class Mysqli {
 		} elseif (isset ($this->_busyPool[$dbSock]) ) {
 			$this->_busyPool[$dbSock]['dbObj']->close();
 			unset($this->_busyPool[$dbSock]);
-		} elseif ( null !== $db && isset ($db['dbObj']) ) {
-			$db['dbObj']->close();
 		} else {
 			\Aha\Log\Sys::log()->warning( "Mysqli Exception [_close] not found [sock] $dbSock " );
 		}
@@ -201,8 +199,6 @@ class Mysqli {
 			return;
 		}
 		
-		unset($this->_busyPool[$dbSock]);
-		
 		//如果事务的set autocommit＝1失败，这个连接不能接着用了
 		//commit失败 这个连接也不能用了
 		//rollback失败 还是不能用
@@ -210,6 +206,7 @@ class Mysqli {
 			return $this->_close($dbSock);
 		}
 
+		unset($this->_busyPool[$dbSock]);
 		$this->_idlePool[$dbSock] = compact('dbObj', 'dbSock');
 		return;
 	}
@@ -247,14 +244,16 @@ class Mysqli {
 		if ( null !== $dbSock ) {
 			$db = $this->_busyPool[$dbSock];
 		} else {
-			$db = array_shift($this->_idlePool);
+			$idleSock = array_rand($this->_idlePool);
+			$db = $this->_idlePool[$idleSock];
+			unset($this->_idlePool[$idleSock]);
 		}
 		$mysqli = $db['dbObj'];
 		$mysqliSock = $db['dbSock'];
 		
 		$result = $mysqli->query($sql, MYSQLI_ASYNC);
+		$this->_busyPool[$mysqliSock] = array_merge($db,compact('sql','callback','onReadFree'));
 		if ( false !== $result ) {
-			$this->_busyPool[$mysqliSock] = array_merge($db,compact('sql','callback','onReadFree'));
 			return true;
 		}
 		
@@ -266,7 +265,7 @@ class Mysqli {
 
 		if ( $mysqli->errno == 2013 || $mysqli->errno == 2006 ) {
 			\Aha\Log\Sys::log()->error( "Mysqli Expected Error[errno]{$mysqli->errno} [error]{$mysqli->error} [SQL] $sql" );
-			$this->_close($db['dbSock'],$db);//连接中断的重新建立新的连接
+			$this->_close($db['dbSock']);//连接中断的重新建立新的连接
 			return $this->query($sql, $callback, $onReadFree, $dbSock, ++$retry);
 		}
 		//其它异常情况 需要通知宿主 但不用关闭连接 可能是sql写错
